@@ -1,50 +1,63 @@
-# Welcome to your Expo app 👋
+# Guess What - Read me
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Screens
+-------
+- Login / Register
+- Main Menu
+  New Game
+  Challenges
+  Saved Stories
+  Settings (accessibility)
+- Friends (Search/Add/Remove friend, friends list, send message(?))
+- New Game Page
+  Instructions modal for players that never played
+  Display friends list and choose who to challenge
+  Story with marked words for replacement
+  Colored words link to camera
+  After taking the picture - the word changes it's color
+  After taking ALL photos - display "Done" button
+- Challenge Game Page
+  Display photo and instructions (noun / verb / number of words)
+  After submitting a guess display next photo
+  After all guesses are submitted - Display story with the guesses
+  Update points and send results to the challenging player
+  "Quit" button - returns to main menu
+- Saved Stories
+   list of saved stories, points and dates
+   upon click - dynamiclly route to story display page
+   - Story display page
+      Story with filled out words
+      Back / Forward buttons (Next story, previous story)
 
-## Get started
+## DB
+Stories
+-------
+id: string
+story: (String)
+magicWords: Object[{word: string, isHandled: boolean}]
+acceptableAnswers: [
+   [
+   {Word: string, Points: number}
+   ],[
+   {Word: string, Points: number}
+   ],[
+   {Word: string, Points: number}
+   ],[
+   {Word: string, Points: number}
+   ]
+];
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Players
+-------
+id: string
+username: string
+hashedPassword: string
+points: number
+friends: objectId[] (other players ids)
+savedGames: {
+   id: number (serial)
+   storyId: (objectId)
+   answers: string[]
+   points: number
+   date: dateTime
+}

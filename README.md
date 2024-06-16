@@ -59,4 +59,4 @@ Players
   }
 ]
 
-![Alt text](image.png)
+![Alt text](assets/images/guess-what-sketch.png)

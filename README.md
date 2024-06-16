@@ -1,7 +1,6 @@
 # Guess What - Read me
 
-Screens
--------
+## Screens
 - Login / Register
 - Main Menu
   New Game
@@ -29,35 +28,33 @@ Screens
       Story with filled out words
       Back / Forward buttons (Next story, previous story)
 
-## DB
+## DB Structure
 Stories
 -------
-id: string
-story: (String)
-magicWords: Object[{word: string, isHandled: boolean}]
-acceptableAnswers: [
-   [
-   {Word: string, Points: number}
-   ],[
-   {Word: string, Points: number}
-   ],[
-   {Word: string, Points: number}
-   ],[
-   {Word: string, Points: number}
-   ]
+[
+  {
+    id: string;
+    story: string;
+    magicWords: Object[{ word: string, isHandled: boolean }];
+    acceptableAnswers: Object[{ word: string, points: number }];
+  }
 ];
 
 Players
 -------
-id: string
-username: string
-hashedPassword: string
-points: number
-friends: objectId[] (other players ids)
-savedGames: {
-   id: number (serial)
-   storyId: (objectId)
-   answers: string[]
-   points: number
-   date: dateTime
-}
+[
+  {
+    id: string;
+    username: string;
+    password: string; // hashed
+    points: number;
+    friends: objectId[]; // other players ids
+    savedStories: [{ 
+      id: number; // serial
+      storyId: objectId; // from stories collection
+      answers: string[];
+      points: number;
+      date: Date;
+     }];
+  }
+]

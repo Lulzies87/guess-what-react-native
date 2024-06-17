@@ -4,7 +4,9 @@ import { StyleSheet, View } from "react-native";
 export default function TakeChallenge() {
   return (
     <View style={styles.container}>
-      <ThemedText type="title">Take Challenge Page</ThemedText>
+      <ThemedText style={styles.title} type="title">
+        Take Challenge Page
+      </ThemedText>
     </View>
   );
 }
@@ -12,7 +14,9 @@ export default function TakeChallenge() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+  },
+  title: {
+    paddingVertical: 20,
   },
 });

@@ -4,7 +4,9 @@ import { StyleSheet, View } from "react-native";
 export default function Friends() {
   return (
     <View style={styles.container}>
-      <ThemedText type="title">Friends Page</ThemedText>
+      <ThemedText style={styles.title} type="title">
+        Friends Page
+      </ThemedText>
     </View>
   );
 }
@@ -12,7 +14,9 @@ export default function Friends() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+  },
+  title: {
+    paddingVertical: 20,
   },
 });

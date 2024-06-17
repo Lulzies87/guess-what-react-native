@@ -1,3 +1,4 @@
+import LoginForm from "@/components/LoginForm";
 import { ThemedText } from "@/components/ThemedText";
 import { StyleSheet, View } from "react-native";
 
@@ -7,6 +8,7 @@ export default function Login() {
       <ThemedText style={styles.title} type="title">
         Login/Register Page
       </ThemedText>
+      <LoginForm />
     </View>
   );
 }

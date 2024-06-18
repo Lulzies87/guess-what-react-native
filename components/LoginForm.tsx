@@ -1,54 +1,39 @@
-import React from "react";
-import { useForm } from "@tanstack/react-form";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 
 export default function LoginForm() {
-  const form = useForm({
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-    onSubmit: async ({ value }) => {
-      console.log(value);
-    },
-  });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = () => {
+    console.log({ username, password });
+  };
 
   return (
     <View style={styles.formContainer}>
-      <View style={styles.formFieldsContainer}>
-        <form.Field
-          name="username"
-          children={(field) => (
-            <TextInput
-              style={styles.formField}
-              placeholder="Username"
-              placeholderTextColor={"#888"}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChangeText={(text) => field.handleChange(text)}
-            />
-          )}
+      <View style={styles.form}>
+        <TextInput
+          style={styles.formField}
+          placeholder="Username"
+          placeholderTextColor={"#888"}
+          value={username}
+          onChangeText={setUsername}
         />
-        <form.Field
-          name="password"
-          children={(field) => (
-            <TextInput
-              style={styles.formField}
-              placeholder="Password"
-              placeholderTextColor={"#888"}
-              secureTextEntry={true}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChangeText={(text) => field.handleChange(text)}
-            />
-          )}
-        />
-      </View>
 
-      <TouchableOpacity style={styles.button} onPress={form.handleSubmit}>
-        <ThemedText style={styles.buttonText}>Login</ThemedText>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.formField}
+          placeholder="Password"
+          secureTextEntry={true}
+          placeholderTextColor={"#888"}
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <ThemedText style={styles.buttonText}>Login</ThemedText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -58,13 +43,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  formFieldsContainer: {
+  form: {
+    width: "100%",
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     gap: 14,
-    width: "80%",
   },
   formField: {
+    width: "80%",
     backgroundColor: "#fff",
     padding: 20,
     textAlign: "center",

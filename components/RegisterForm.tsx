@@ -1,14 +1,52 @@
 import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
+import axios from "axios";
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = () => {
-    console.log({ username, password, confirmPassword });
+  const isValidUsername = (username: string): boolean => {
+    const usernameRegex = /^[a-zA-Z0-9]{6,16}$/;
+
+    return usernameRegex.test(username);
+  };
+
+  const isValidPassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+
+    return passwordRegex.test(password);
+  };
+
+  const handleSubmit = async () => {
+    if (!isValidUsername(username)) {
+      return console.error(
+        "Username must be 6-16 characters and can contain only letters and numbers"
+      );
+    }
+
+    if (!isValidPassword(password)) {
+      return console.error(
+        "Password must be 8-15 characters and contain at least one lowercase letter, one uppercase letter, one digit, and one special character"
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return console.error("Passwords don't match!");
+    }
+
+    try {
+      await axios.post("http://localhost:3000/register", {
+        username,
+        password,
+      });
+      console.log("Player registered!");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

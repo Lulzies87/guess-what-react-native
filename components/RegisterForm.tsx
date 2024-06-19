@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
+import server from "../app/api-client";
 import axios from "axios";
 
 export default function RegisterForm() {
@@ -39,7 +40,7 @@ export default function RegisterForm() {
     }
 
     try {
-      await axios.post("http://localhost:3000/register", {
+      await server.post("/register", {
         username,
         password,
       });

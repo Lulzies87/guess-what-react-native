@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 
 let connection: mongoose.ConnectOptions | undefined;
 
-export function getConnection() {
-  if (!connection) {
-    throw new Error("Must init connection first!");
-  }
+// export function getConnection() {
+//   if (!connection) {
+//     throw new Error("Must init connection first!");
+//   }
 
-  return connection;
-}
+//   return connection;
+// }
 
 export async function initConnection() {
   if (!process.env.CONN_STRING) {

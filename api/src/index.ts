@@ -15,6 +15,31 @@ app.get("/check", (_, res) => {
   res.status(200).json("Hello");
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await Player.findOne({ username: username });
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: "Username / Password is incorrect" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ error: "Username / Password is incorrect" });
+    }
+
+    return res.status(200).json({ message: "Player found!" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import axios from "axios";
+import server from "../app/api-client";
+import { router } from "expo-router";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
-import server from "../app/api-client";
-import axios from "axios";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
@@ -11,7 +12,8 @@ export default function LoginForm() {
   const handleSubmit = async () => {
     try {
       const res = await server.post("/login", { username, password });
-      const userData = res.data;
+      const userData = res.data; // TODO: Decide how to handle player data
+      router.replace("/mainMenuPage");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {

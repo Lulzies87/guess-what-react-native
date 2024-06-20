@@ -1,12 +1,70 @@
 import { ThemedText } from "@/components/ThemedText";
-import { StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
 
 export default function MainMenu() {
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title} type="title">
-        Main Manu Page
-      </ThemedText>
+      <View style={styles.titleContainer}>
+        <ThemedText type="title">Main Manu Page</ThemedText>
+      </View>
+
+      <View style={styles.buttonsContainer}>
+        <Pressable>
+          <ThemedText
+            type="link"
+            onPress={() => {
+              router.navigate("/createChallengePage");
+            }}
+          >
+            Create a Challenge
+          </ThemedText>
+        </Pressable>
+
+        <Pressable>
+          <ThemedText
+            type="link"
+            onPress={() => {
+              router.navigate("/takeChallengePage");
+            }}
+          >
+            My Challenges
+          </ThemedText>
+        </Pressable>
+
+        <Pressable>
+          <ThemedText
+            type="link"
+            onPress={() => {
+              router.navigate("/friendsPage");
+            }}
+          >
+            Friends
+          </ThemedText>
+        </Pressable>
+
+        <Pressable>
+          <ThemedText
+            type="link"
+            onPress={() => {
+              router.navigate("/savedStoriesPage");
+            }}
+          >
+            My Saved Stories
+          </ThemedText>
+        </Pressable>
+
+        <Pressable>
+          <ThemedText
+            type="link"
+            onPress={() => {
+              console.log("Open settings modal");
+            }}
+          >
+            Settings
+          </ThemedText>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -14,9 +72,17 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
   },
-  title: {
+  titleContainer: {
+    width: "100%",
+    alignItems: "center",
     paddingVertical: 20,
+  },
+  buttonsContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 40,
   },
 });

@@ -58,3 +58,5 @@ Players
      }];
   }
 ]
+
+![Alt text](assets/images/guess-what-sketch.png)

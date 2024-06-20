@@ -16,10 +16,15 @@ app.get("/check", (_, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const userData = await Player.findOne({ username: username });
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ error: "Both username and password are required" });
+  }
 
+  try {
+    const userData = await Player.findOne({ username: username });
     if (!userData) {
       return res
         .status(401)
@@ -27,14 +32,15 @@ app.post("/login", async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, userData.password);
-
     if (!isMatch) {
       return res
         .status(401)
         .json({ error: "Username / Password is incorrect" });
     }
 
-    return res.status(200).json({ message: "Player found!" });
+    const { password: userPassword, ...user } = userData.toObject();
+
+    return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -50,7 +56,6 @@ app.post("/register", async (req, res) => {
         .json({ error: "Both username and password are required" });
     }
 
-    // const connection = getConnection();
     const existingUser = await Player.findOne({ username });
     if (existingUser) {
       return res.status(409).json({ error: "Username already exists" });

@@ -1,13 +1,30 @@
 import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
+import server from "../app/api-client";
+import axios from "axios";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = () => {
-    console.log({ username, password });
+  const handleSubmit = async () => {
+    try {
+      const res = await server.post("/login", { username, password });
+      const userData = res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error(error.response.data.error);
+        } else if (error.request) {
+          console.error("No response recieved:", error.request);
+        } else {
+          console.error(error.message);
+        }
+      } else {
+        console.error("An unexpected error occured");
+      }
+    }
   };
 
   return (

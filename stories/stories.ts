@@ -122,7 +122,6 @@ const stories: Story[] = [
     acceptableGuesses: [
       [
         { word: "hidden", points: 100 },
-        { word: "secret", points: 100 },
         { word: "concealed", points: 100 },
         { word: "obscure", points: 50 },
         { word: "veiled", points: 50 },
@@ -130,10 +129,12 @@ const stories: Story[] = [
       ],
       [
         { word: "sage", points: 100 },
+        { word: "wizard", points: 100 },
         { word: "wise one", points: 50 },
         { word: "elder", points: 50 },
         { word: "seer", points: 50 },
         { word: "oracle", points: 50 },
+        { word: "magician", points: 50 },
         { word: "prophet", points: 50 },
       ],
       [
@@ -141,7 +142,6 @@ const stories: Story[] = [
         { word: "mysteries", points: 100 },
         { word: "enigmas", points: 100 },
         { word: "riddles", points: 50 },
-        { word: "arcana", points: 50 },
         { word: "cryptic", points: 50 },
       ],
       [

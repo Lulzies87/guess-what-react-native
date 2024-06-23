@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
-import { stories } from "@/stories/stories";
-import { StyleSheet, View } from "react-native";
+import { getRandomStoryNumber, stories } from "@/stories/stories";
+import { Link } from "expo-router";
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 
 export default function CreateChallenge() {
   return (
@@ -8,7 +9,7 @@ export default function CreateChallenge() {
       <ThemedText style={styles.title} type="title">
         Create Challenge Page
       </ThemedText>
-      <Story randomStoryNumber={0} />
+      <Story randomStoryNumber={getRandomStoryNumber(stories)} />
     </View>
   );
 }
@@ -18,11 +19,32 @@ type StoryProps = {
 };
 
 function Story({ randomStoryNumber }: StoryProps) {
+  const plot = stories[randomStoryNumber].plot;
+  const content = replacePlaceholdersWithLinks(plot);
+
   return (
     <View style={styles.storyContainer}>
-      <ThemedText>{stories[randomStoryNumber].plot}</ThemedText>
+      <ThemedText type="default">{content}</ThemedText>
     </View>
   );
+}
+
+function replacePlaceholdersWithLinks(plot: string): JSX.Element[] {
+  const parts = plot.split(/(\$\d+)/g);
+  return parts.map((part, index) => {
+    const match = part.match(/\$(\d+)/);
+    if (match) {
+      const keywordIndex = parseInt(match[1], 10) + 1;
+      return (
+        <Link key={index} href={`/createChallengePage/wordNumber${keywordIndex}`} asChild>
+          <TouchableOpacity>
+            <Text style={styles.link}>WORD{keywordIndex}</Text>
+          </TouchableOpacity>
+        </Link>
+      );
+    }
+    return <Text key={index}>{part}</Text>;
+  });
 }
 
 const styles = StyleSheet.create({
@@ -35,5 +57,10 @@ const styles = StyleSheet.create({
   },
   storyContainer: {
     padding: 20,
+  },
+  link: {
+    color: "blue",
+    textDecorationLine: "underline",
+    fontWeight: "800",
   },
 });

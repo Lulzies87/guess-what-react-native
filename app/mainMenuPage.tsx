@@ -1,5 +1,6 @@
 import SettingsModal from "@/components/SettingsModal";
 import { ThemedText } from "@/components/ThemedText";
+import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -22,7 +23,7 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              router.navigate("/createChallengePage");
+              router.navigate(`/createChallengePage`);
             }}
           >
             Create a Challenge

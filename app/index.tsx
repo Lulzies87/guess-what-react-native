@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/ThemedText";
+import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -27,7 +28,7 @@ export default function Home() {
           </Pressable>
         </Link>
 
-        <Link href={"/createChallengePage"} asChild>
+        <Link href={`/createChallengePage?id=${getRandomStoryNumber(stories)}`} asChild>
           <Pressable style={styles.button}>
             <ThemedText style={styles.buttonText}>
               Create Challenge Page

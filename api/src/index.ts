@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 
@@ -77,6 +79,23 @@ app.post("/register", async (req, res) => {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+app.post("/upload", (req, res) => {
+  const imageData = req.body.imageData;
+  const buffer = Buffer.from(imageData, "base64");
+  const fileName = `image_${Date.now()}.jpg`;
+  const filePath = path.join(__dirname, "public", "images", fileName);
+
+  fs.writeFile(filePath, buffer, (err) => {
+    if (err) {
+      console.error("Error saving image:", err);
+      return res.status(500).json({ error: "Failed to save image" });
+    }
+
+    console.log("Image saved successfully");
+    res.status(200).json({ fileName });
+  });
 });
 
 async function init() {

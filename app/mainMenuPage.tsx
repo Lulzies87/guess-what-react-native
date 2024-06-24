@@ -23,7 +23,7 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              router.navigate(`/createChallengePage`);
+              router.navigate(`/createChallengePage?id=${getRandomStoryNumber(stories)}`);
             }}
           >
             Create a Challenge

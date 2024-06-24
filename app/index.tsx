@@ -28,7 +28,10 @@ export default function Home() {
           </Pressable>
         </Link>
 
-        <Link href={`/createChallengePage?id=${getRandomStoryNumber(stories)}`} asChild>
+        <Link
+          href={`/createChallengePage?id=${getRandomStoryNumber(stories)}`}
+          asChild
+        >
           <Pressable style={styles.button}>
             <ThemedText style={styles.buttonText}>
               Create Challenge Page
@@ -52,11 +55,11 @@ export default function Home() {
           </Pressable>
         </Link>
 
-        <View style={styles.button}>
-          <Link href="/takePicturePage">
+        <Link href="/takePicturePage" asChild>
+          <Pressable style={styles.button}>
             <ThemedText style={styles.buttonText}>Take Picture</ThemedText>
-          </Link>
-        </View>
+          </Pressable>
+        </Link>
       </View>
     </View>
   );

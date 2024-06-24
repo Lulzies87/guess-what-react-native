@@ -1,15 +1,56 @@
 import { ThemedText } from "@/components/ThemedText";
-import { getRandomStoryNumber, stories } from "@/stories/stories";
-import { Link } from "expo-router";
-import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import WordsModal from "@/components/WordsModal";
+import { stories } from "@/stories/stories";
+import { Link, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  Pressable,
+} from "react-native";
 
 export default function CreateChallenge() {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const params = useLocalSearchParams();
+
+  const onModalClose = () => {
+    setIsModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <ThemedText style={styles.title} type="title">
         Create Challenge Page
       </ThemedText>
-      <Story randomStoryNumber={getRandomStoryNumber(stories)} />
+      <Link href={`/`} asChild>
+        <TouchableOpacity>
+          <Text style={styles.link}>Home</Text>
+        </TouchableOpacity>
+      </Link>
+      <Story randomStoryNumber={Number(params.id)} />
+      <Pressable>
+        <ThemedText
+          type="link"
+          onPress={() => {
+            setIsModalVisible(true);
+          }}
+        >
+          Settings
+        </ThemedText>
+      </Pressable>
+      <WordsModal
+        isVisible={isModalVisible}
+        onClose={onModalClose}
+        wordNumber={1}
+      >
+        <View style={styles.wordsModalContainer}>
+          <ThemedText>Setting 1</ThemedText>
+          <ThemedText>Setting 2</ThemedText>
+          <ThemedText>Setting 3</ThemedText>
+        </View>
+      </WordsModal>
     </View>
   );
 }
@@ -36,7 +77,11 @@ function replacePlaceholdersWithLinks(plot: string): JSX.Element[] {
     if (match) {
       const keywordIndex = parseInt(match[1], 10) + 1;
       return (
-        <Link key={index} href={`/createChallengePage/wordNumber${keywordIndex}`} asChild>
+        <Link
+          key={index}
+          href={`/createChallengePage/chosenWord#${keywordIndex}`}
+          asChild
+        >
           <TouchableOpacity>
             <Text style={styles.link}>WORD{keywordIndex}</Text>
           </TouchableOpacity>
@@ -62,5 +107,11 @@ const styles = StyleSheet.create({
     color: "blue",
     textDecorationLine: "underline",
     fontWeight: "800",
+  },
+  wordsModalContainer: {
+    flex: 1,
+    width: "100%",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
 });

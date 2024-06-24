@@ -158,6 +158,6 @@ export const stories: Story[] = [
 
 export function getRandomStoryNumber(stories: Story[]): number {
   const arrayLength = stories.length;
-  const randomNumber = Math.floor(Math.random() * arrayLength) + 1;
+  const randomNumber = Math.floor(Math.random() * arrayLength);
   return randomNumber;
 }

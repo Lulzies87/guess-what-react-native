@@ -6,7 +6,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 type WordsModalProps = {
   isVisible: boolean;
   children: ReactNode;
-  wordNumber: number;
+  wordNumber: number | null;
   onClose: () => void;
 };
 
@@ -21,7 +21,7 @@ export default function WordsModal({
       <View style={styles.overlay}>
         <View style={styles.contnainer}>
           <View style={styles.titleContainer}>
-            <ThemedText type="subtitle">Word #{wordNumber}</ThemedText>
+            <ThemedText type="subtitle">Word #{wordNumber! + 1}</ThemedText>
             <Pressable onPress={onClose}>
               <MaterialIcons name="close" color="black" size={22} />
             </Pressable>

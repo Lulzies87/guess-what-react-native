@@ -9,14 +9,26 @@ import {
   View,
   Text,
   Pressable,
+  TextInput,
 } from "react-native";
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<number | null>(null);
+  const [words, setWords] = useState(["", "", "", ""]);
+  const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
 
   const onModalClose = () => {
+    if (selectedKeywordIndex !== null) {
+      const updatedWords = [...words];
+      updatedWords[selectedKeywordIndex] = currentWord;
+      console.log("Updated words before setting state:", updatedWords);  // Debugging log
+      setWords(updatedWords);
+    }
     setIsModalVisible(false);
+    setSelectedKeywordIndex(null);
+    setCurrentWord("");
   };
 
   return (
@@ -29,26 +41,28 @@ export default function CreateChallenge() {
           <Text style={styles.link}>Home</Text>
         </TouchableOpacity>
       </Link>
-      <Story randomStoryNumber={Number(params.id)} />
-      <Pressable>
-        <ThemedText
-          type="link"
-          onPress={() => {
-            setIsModalVisible(true);
-          }}
-        >
-          Settings
-        </ThemedText>
-      </Pressable>
+      <Story
+        randomStoryNumber={Number(params.id)}
+        setIsModalVisible={setIsModalVisible}
+        setSelectedKeywordIndex={setSelectedKeywordIndex}
+        setCurrentWord={setCurrentWord}
+        words={words}
+      />
       <WordsModal
         isVisible={isModalVisible}
         onClose={onModalClose}
-        wordNumber={1}
+        wordNumber={selectedKeywordIndex}
       >
         <View style={styles.wordsModalContainer}>
-          <ThemedText>Setting 1</ThemedText>
-          <ThemedText>Setting 2</ThemedText>
-          <ThemedText>Setting 3</ThemedText>
+          <Label htmlFor="chosenWord">
+            Choose Word
+            <TextInput
+              id="chosenWord"
+              value={currentWord}
+              onChangeText={setCurrentWord}
+              style={styles.input}
+            />
+          </Label>
         </View>
       </WordsModal>
     </View>
@@ -57,11 +71,27 @@ export default function CreateChallenge() {
 
 type StoryProps = {
   randomStoryNumber: number;
+  setIsModalVisible: (visible: boolean) => void;
+  setSelectedKeywordIndex: (index: number | null) => void;
+  setCurrentWord: (word: string) => void;
+  words: string[];
 };
 
-function Story({ randomStoryNumber }: StoryProps) {
+function Story({
+  randomStoryNumber,
+  setIsModalVisible,
+  setSelectedKeywordIndex,
+  setCurrentWord,
+  words,
+}: StoryProps) {
   const plot = stories[randomStoryNumber].plot;
-  const content = replacePlaceholdersWithLinks(plot);
+  const content = replacePlaceholdersWithLinks(
+    plot,
+    setIsModalVisible,
+    setSelectedKeywordIndex,
+    setCurrentWord,
+    words
+  );
 
   return (
     <View style={styles.storyContainer}>
@@ -70,27 +100,47 @@ function Story({ randomStoryNumber }: StoryProps) {
   );
 }
 
-function replacePlaceholdersWithLinks(plot: string): JSX.Element[] {
+function replacePlaceholdersWithLinks(
+  plot: string,
+  setIsModalVisible: (visible: boolean) => void,
+  setSelectedKeywordIndex: (index: number | null) => void,
+  setCurrentWord: (word: string) => void,
+  words: string[]
+): JSX.Element[] {
   const parts = plot.split(/(\$\d+)/g);
   return parts.map((part, index) => {
     const match = part.match(/\$(\d+)/);
     if (match) {
-      const keywordIndex = parseInt(match[1], 10) + 1;
+      const keywordIndex = parseInt(match[1], 10);
+      const chosenWord = words[keywordIndex] || `____${keywordIndex + 1}`;
       return (
-        <Link
+        <Pressable
           key={index}
-          href={`/createChallengePage/chosenWord#${keywordIndex}`}
-          asChild
+          onPress={() => {
+            setSelectedKeywordIndex(keywordIndex);
+            setCurrentWord(words[keywordIndex] || "");
+            setIsModalVisible(true);
+          }}
         >
-          <TouchableOpacity>
-            <Text style={styles.link}>WORD{keywordIndex}</Text>
-          </TouchableOpacity>
-        </Link>
+          <Text style={styles.link}>{chosenWord}</Text>
+        </Pressable>
       );
     }
     return <Text key={index}>{part}</Text>;
   });
 }
+
+const Label = ({
+  htmlFor,
+  children,
+}: {
+  htmlFor: string;
+  children: React.ReactNode;
+}) => (
+  <View style={{ marginVertical: 8 }}>
+    <Text>{children}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -113,5 +163,13 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#ccc",
+    padding: 8,
+    marginTop: 8,
+    width: "100%",
   },
 });

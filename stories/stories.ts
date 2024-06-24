@@ -9,7 +9,7 @@ type Story = {
   acceptableGuesses: AcceptableGuess[][];
 };
 
-const stories: Story[] = [
+export const stories: Story[] = [
   {
     plot: "In a quiet village nestled between the mountains, an $0 clockmaker worked tirelessly in his dimly lit shop. One evening, he discovered a tiny, magical $1 that brought his clocks to life, ticking with an ethereal glow. Word of his enchanted clocks spread, drawing $2 from distant lands to witness their beauty. The village thrived, forever transformed by the clockmaker's extraordinary $3.",
     keywords: ["old", "gear", "people", "discovery"],
@@ -116,4 +116,48 @@ const stories: Story[] = [
       ],
     ],
   },
+  {
+    plot: "Once upon a time, in a $0 village nestled within dense forests and winding rivers, there lived a reclusive $1 named Alaric. Alaric was known throughout the village for his mysterious demeanor and his knack for uncovering ancient $2 buried beneath layers of time. One day, a curious wanderer stumbled upon the village, seeking the counsel of a knowledgeable $1 to decipher the enigmatic $2 of a mystical $3. Intrigued by the wanderer's quest, Alaric welcomed them into his $0 workshop, and together they embarked on a journey to unlock the $2 surrounding the creation of the $3. As the stars danced in the night sky, Alaric shared his wisdom, guiding the wanderer through the labyrinth of arcane knowledge. When the final incantation was uttered, the wanderer beheld the newly awakened powers of the $3, knowing that with this $3, they held the key to unlocking their destiny.",
+    keywords: ["hidden", "sage", "secrets", "relic"],
+    acceptableGuesses: [
+      [
+        { word: "hidden", points: 100 },
+        { word: "concealed", points: 100 },
+        { word: "obscure", points: 50 },
+        { word: "veiled", points: 50 },
+        { word: "covert", points: 50 },
+      ],
+      [
+        { word: "sage", points: 100 },
+        { word: "wizard", points: 100 },
+        { word: "wise one", points: 50 },
+        { word: "elder", points: 50 },
+        { word: "seer", points: 50 },
+        { word: "oracle", points: 50 },
+        { word: "magician", points: 50 },
+        { word: "prophet", points: 50 },
+      ],
+      [
+        { word: "secrets", points: 100 },
+        { word: "mysteries", points: 100 },
+        { word: "enigmas", points: 100 },
+        { word: "riddles", points: 50 },
+        { word: "cryptic", points: 50 },
+      ],
+      [
+        { word: "relic", points: 100 },
+        { word: "artefact", points: 100 },
+        { word: "antiquity", points: 100 },
+        { word: "heirloom", points: 50 },
+        { word: "remnant", points: 50 },
+        { word: "vestige", points: 50 },
+      ],
+    ],
+  },
 ];
+
+export function getRandomStoryNumber(stories: Story[]): number {
+  const arrayLength = stories.length;
+  const randomNumber = Math.floor(Math.random() * arrayLength) + 1;
+  return randomNumber;
+}

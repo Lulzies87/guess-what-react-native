@@ -51,6 +51,12 @@ export default function Home() {
             </ThemedText>
           </Pressable>
         </Link>
+
+        <View style={styles.button}>
+          <Link href="/takePicturePage">
+            <ThemedText style={styles.buttonText}>Take Picture</ThemedText>
+          </Link>
+        </View>
       </View>
     </View>
   );

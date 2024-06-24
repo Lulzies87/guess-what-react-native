@@ -1,7 +1,7 @@
 import React from "react";
-import Camera from "@/components/Camera";
+import CameraComponent from "@/components/CameraComponent";
 
 export default function takePicturePage() {
-  return <Camera />;
+  return <CameraComponent />;
 }
                                                                         

@@ -1,25 +1,54 @@
 import { useRef, useState } from "react";
-import {
-  Camera,
-  CameraType,
-  CameraView,
-  useCameraPermissions,
-} from "expo-camera";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-} from "react-native";
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import * as ImageManipulator from "expo-image-manipulator";
 import server from "../app/api-client";
 
 export default function CameraComponent() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
-  const [photoURI, setPhotoURI] = useState<string | null>(null);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
+
+  const toggleCameraFacing = () => {
+    setFacing((current) => (current === "back" ? "front" : "back"));
+  };
+
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync();
+
+      if (photo) {
+        const resizedPhoto = await ImageManipulator.manipulateAsync(
+          photo.uri,
+          [{ resize: { width: 800 } }],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        uploadImage(resizedPhoto.uri);
+      } else {
+        console.error("There was a problem with the photo:", photo);
+      }
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    const formData = new FormData();
+    formData.append("image", {
+      uri,
+      type: "image/jpeg",
+      name: `image_${Date.now()}.jpg`,
+    } as any);
+
+    try {
+      const res = await server.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Image uploaded successfully:", res.data);
+    } catch (error) {
+      console.error("Error uploading image:", JSON.stringify(error));
+    }
+  };
 
   if (!permission) {
     return <View />;
@@ -36,47 +65,23 @@ export default function CameraComponent() {
     );
   }
 
-  function toggleCameraFacing() {
-    setFacing((current) => (current === "back" ? "front" : "back"));
-  }
-
-  async function takePhoto() {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.5,
-      });
-      console.log("Photo taken:", photo);
-      setPhotoURI(photo.uri);
-
-      try {
-        const res = await server.post("/upload", { imageData: photo.base64 });
-        console.log("Server response:", res.data);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-  }
-
   return (
     <View style={styles.container}>
       <CameraView
+        ref={cameraRef}
         style={styles.camera}
         facing={facing}
-        ref={cameraRef}
-        pictureSize=""
+        pictureSize={"Low"}
       >
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
             <Text style={styles.text}>Flip Camera</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePhoto}>
-            <Text style={styles.text}>Take Photo</Text>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <Text style={styles.text}>Take Picture</Text>
           </TouchableOpacity>
         </View>
       </CameraView>
-      {photoURI && (
-        <Image source={{ uri: photoURI }} style={styles.capturedImage} />
-      )}
     </View>
   );
 }

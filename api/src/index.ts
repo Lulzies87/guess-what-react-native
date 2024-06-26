@@ -2,16 +2,34 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
-import path from "path";
-import fs from "fs";
 
 const app = express();
 
 app.use(cors());
 app.use(json());
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "public", "images");
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
 
 app.get("/check", (_, res) => {
   res.status(200).json("Hello");
@@ -81,21 +99,22 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/upload", (req, res) => {
-  const imageData = req.body.imageData;
-  const buffer = Buffer.from(imageData, "base64");
-  const fileName = `image_${Date.now()}.jpg`;
-  const filePath = path.join(__dirname, "public", "images", fileName);
-
-  fs.writeFile(filePath, buffer, (err) => {
-    if (err) {
-      console.error("Error saving image:", err);
-      return res.status(500).json({ error: "Failed to save image" });
+app.post("/upload", upload.single("image"), (req, res) => {
+  try {
+    if (!req.file) {
+      throw new Error("File upload failed");
     }
-
-    console.log("Image saved successfully");
-    res.status(200).json({ fileName });
-  });
+    console.log("Image uploaded!", req.file);
+    res.status(200).json({ fileName: req.file!.filename });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error uploading image:", error.message);
+      res.status(500).json({ error: "Failed to upload image" });
+    } else {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ error: "Unexpected error occurred" });
+    }
+  }
 });
 
 async function init() {

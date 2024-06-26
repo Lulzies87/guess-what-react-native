@@ -3,6 +3,7 @@ import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import server from "../app/api-client";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function CameraComponent() {
   const [facing, setFacing] = useState<CameraType>("back");
@@ -75,10 +76,13 @@ export default function CameraComponent() {
       >
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
+            <AntDesign name="reload1" size={34} color="lightgray" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>Take Picture</Text>
+            <AntDesign name="camera" size={34} color="lightgray" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <AntDesign name="close" size={34} color="lightgray" />
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -97,8 +101,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 64,
+    justifyContent: "space-between",
+    position: "absolute",
+    bottom: "5%",
   },
   button: {
     flex: 1,

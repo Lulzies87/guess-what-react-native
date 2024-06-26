@@ -1,14 +1,23 @@
 import { useRef, useState } from "react";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import server from "../app/api-client";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 
 export default function CameraComponent() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
+  const [resizedPhotoUri, setResizedPhotoUri] = useState<string | null>(null);
+
   const cameraRef = useRef<CameraView>(null);
   const navigation = useNavigation();
 
@@ -16,11 +25,11 @@ export default function CameraComponent() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
-  const closeCamera = () => {
+  const onClose = () => {
     navigation.goBack();
   };
 
-  const takePicture = async () => {
+  const onTakePicture = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
 
@@ -30,10 +39,21 @@ export default function CameraComponent() {
           [{ resize: { width: 800 } }],
           { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
         );
-        uploadImage(resizedPhoto.uri);
+        setResizedPhotoUri(resizedPhoto.uri);
       } else {
         console.error("There was a problem with the photo:", photo);
       }
+    }
+  };
+
+  const onRetakePicture = () => {
+    setResizedPhotoUri(null);
+  };
+
+  const onSubmitPicture = () => {
+    if (resizedPhotoUri) {
+      uploadImage(resizedPhotoUri);
+      onClose(); // navigating back to previous route in navigation history
     }
   };
 
@@ -74,24 +94,45 @@ export default function CameraComponent() {
 
   return (
     <View style={styles.container}>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
-        pictureSize={"Low"}
-      >
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <AntDesign name="reload1" size={34} color="lightgray" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <AntDesign name="camera" size={34} color="lightgray" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={closeCamera}>
-            <AntDesign name="close" size={34} color="lightgray" />
-          </TouchableOpacity>
+      {resizedPhotoUri ? (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: resizedPhotoUri }} style={styles.image} />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={onRetakePicture}>
+              <MaterialCommunityIcons
+                name="camera-retake"
+                size={34}
+                color="lightgray"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={onSubmitPicture}>
+              <AntDesign name="check" size={34} color="lightgray" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </CameraView>
+      ) : (
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing={facing}
+          pictureSize={"Low"}
+        >
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={toggleCameraFacing}
+            >
+              <AntDesign name="reload1" size={34} color="lightgray" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={onTakePicture}>
+              <AntDesign name="camera" size={34} color="lightgray" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={onClose}>
+              <AntDesign name="close" size={34} color="lightgray" />
+            </TouchableOpacity>
+          </View>
+        </CameraView>
+      )}
     </View>
   );
 }
@@ -109,7 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     position: "absolute",
-    bottom: "5%",
+    bottom: "7%",
   },
   button: {
     flex: 1,
@@ -121,10 +162,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
   },
-  capturedImage: {
-    width: 200,
-    height: 200,
-    marginTop: 20,
-    alignSelf: "center",
+  imageContainer: {
+    flex: 1,
+  },
+  image: {
+    flex: 1,
   },
 });

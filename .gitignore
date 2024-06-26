@@ -11,6 +11,7 @@ npm-debug.*
 *.orig.*
 web-build/
 stories.json
+api-client.ts
 
 # macOS
 .DS_Store

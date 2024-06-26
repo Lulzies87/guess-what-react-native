@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/ThemedText";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -14,21 +14,24 @@ import {
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<number | null>(null);
+  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
+    number | null
+  >(null);
   const [words, setWords] = useState(["", "", "", ""]);
   const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
 
   const onModalClose = () => {
+    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
+  };
+
+  const onModalSave = () => {
     if (selectedKeywordIndex !== null) {
       const updatedWords = [...words];
       updatedWords[selectedKeywordIndex] = currentWord;
-      console.log("Updated words before setting state:", updatedWords);  // Debugging log
       setWords(updatedWords);
     }
-    setIsModalVisible(false);
-    setSelectedKeywordIndex(null);
-    setCurrentWord("");
+    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
   };
 
   return (
@@ -51,18 +54,17 @@ export default function CreateChallenge() {
       <WordsModal
         isVisible={isModalVisible}
         onClose={onModalClose}
+        onSave={onModalSave}
         wordNumber={selectedKeywordIndex}
       >
         <View style={styles.wordsModalContainer}>
-          <Label htmlFor="chosenWord">
-            Choose Word
-            <TextInput
-              id="chosenWord"
-              value={currentWord}
-              onChangeText={setCurrentWord}
-              style={styles.input}
-            />
-          </Label>
+          <ThemedText type="defaultSemiBold">Choose Word</ThemedText>
+          <TextInput
+            id="chosenWord"
+            value={currentWord}
+            onChangeText={setCurrentWord}
+            style={styles.input}
+          />
         </View>
       </WordsModal>
     </View>
@@ -76,6 +78,25 @@ type StoryProps = {
   setCurrentWord: (word: string) => void;
   words: string[];
 };
+
+function useExitModal(
+  setIsModalVisible: {
+    (value: SetStateAction<boolean>): void;
+    (arg0: boolean): void;
+  },
+  setSelectedKeywordIndex: {
+    (value: SetStateAction<number | null>): void;
+    (arg0: null): void;
+  },
+  setCurrentWord: {
+    (value: SetStateAction<string>): void;
+    (arg0: string): void;
+  }
+) {
+  setIsModalVisible(false);
+  setSelectedKeywordIndex(null);
+  setCurrentWord("");
+}
 
 function Story({
   randomStoryNumber,
@@ -129,18 +150,6 @@ function replacePlaceholdersWithLinks(
     return <Text key={index}>{part}</Text>;
   });
 }
-
-const Label = ({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: React.ReactNode;
-}) => (
-  <View style={{ marginVertical: 8 }}>
-    <Text>{children}</Text>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {

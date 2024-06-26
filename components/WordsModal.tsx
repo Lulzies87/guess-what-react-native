@@ -8,6 +8,7 @@ type WordsModalProps = {
   children: ReactNode;
   wordNumber: number | null;
   onClose: () => void;
+  onSave: () => void;
 };
 
 export default function WordsModal({
@@ -15,6 +16,7 @@ export default function WordsModal({
   children,
   wordNumber,
   onClose,
+  onSave,
 }: WordsModalProps) {
   return (
     <Modal animationType="fade" transparent={true} visible={isVisible}>
@@ -27,6 +29,9 @@ export default function WordsModal({
             </Pressable>
           </View>
           {children}
+          <Pressable onPress={onSave}>
+            <MaterialIcons name="check-circle" color="black" size={30} />
+          </Pressable>
         </View>
       </View>
     </Modal>

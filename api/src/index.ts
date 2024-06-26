@@ -104,8 +104,12 @@ app.post("/upload", upload.single("image"), (req, res) => {
     if (!req.file) {
       throw new Error("File upload failed");
     }
+
+    const fileName = req.file.filename;
+    const filePath = path.join(__dirname, "public", "images", fileName);
+
     console.log("Image uploaded!", req.file);
-    res.status(200).json({ fileName: req.file!.filename });
+    res.status(200).json({ fileName, filePath });
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error uploading image:", error.message);

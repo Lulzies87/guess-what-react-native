@@ -57,7 +57,7 @@ export default function RegisterForm() {
         <TextInput
           style={styles.formField}
           placeholder="Username"
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#888"
           value={username}
           onChangeText={setUsername}
         />
@@ -66,7 +66,7 @@ export default function RegisterForm() {
           style={styles.formField}
           placeholder="Password"
           secureTextEntry={true}
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#888"
           value={password}
           onChangeText={setPassword}
         />
@@ -75,7 +75,7 @@ export default function RegisterForm() {
           style={styles.formField}
           placeholder="Confirm Password"
           secureTextEntry={true}
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#888"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />

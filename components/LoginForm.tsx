@@ -35,7 +35,7 @@ export default function LoginForm() {
         <TextInput
           style={styles.formField}
           placeholder="Username"
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#888"
           value={username}
           onChangeText={setUsername}
         />
@@ -44,7 +44,7 @@ export default function LoginForm() {
           style={styles.formField}
           placeholder="Password"
           secureTextEntry={true}
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#888"
           value={password}
           onChangeText={setPassword}
         />

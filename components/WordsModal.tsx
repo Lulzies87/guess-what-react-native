@@ -12,6 +12,8 @@ type WordsModalProps = {
   onSave: () => void;
 };
 
+const wordKeys: (keyof Words)[] = ['firstWord', 'secondWord', 'thirdWord', 'fourthWord'];
+
 export default function WordsModal({
   isVisible,
   children,
@@ -19,12 +21,14 @@ export default function WordsModal({
   onClose,
   onSave,
 }: WordsModalProps) {
+  const wordIndex = wordNumber !== null ? wordKeys.indexOf(wordNumber) + 1 : null;
+
   return (
     <Modal animationType="fade" transparent={true} visible={isVisible}>
       <View style={styles.overlay}>
         <View style={styles.contnainer}>
           <View style={styles.titleContainer}>
-            <ThemedText type="subtitle">Word #{wordNumber! + 1}</ThemedText>
+            <ThemedText type="subtitle">Word #{wordIndex}</ThemedText>
             <Pressable onPress={onClose}>
               <MaterialIcons name="close" color="black" size={22} />
             </Pressable>

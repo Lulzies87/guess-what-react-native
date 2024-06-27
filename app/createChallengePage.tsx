@@ -13,6 +13,7 @@ import {
   Text,
   Pressable,
   TextInput,
+  ScrollView,
 } from "react-native";
 
 export default function CreateChallenge() {
@@ -73,6 +74,7 @@ export default function CreateChallenge() {
   };
 
   return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
     <View style={styles.container}>
       <ThemedText style={styles.title} type="title">
         Create Challenge Page
@@ -112,7 +114,6 @@ export default function CreateChallenge() {
             ]}
             labelField="label"
             valueField="value"
-            placeholder="Select Word Type"
             value={selectedWordType}
             onChange={item => {
               setSelectedWordType(item.value as "verb" | "noun" | "adjective");
@@ -133,7 +134,7 @@ export default function CreateChallenge() {
               setSelectedWordNumber(item.value as "singular" | "plural" | undefined);
             }}
           />
-          <Link href="/takePicturePage" asChild>
+          <Link style={[styles.centered]} href="/takePicturePage" asChild>
             <Pressable>
               <MaterialIcons name="camera-alt" color="black" size={30} />
               <ThemedText>Take pic</ThemedText>
@@ -142,6 +143,7 @@ export default function CreateChallenge() {
         </View>
       </WordsModal>
     </View>
+    </ScrollView>
   );
 }
 
@@ -274,6 +276,11 @@ const styles = StyleSheet.create({
   centered: {
     flex: 1,
     padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
     alignItems: "center",
   },
 });

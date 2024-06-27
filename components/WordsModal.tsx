@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   contnainer: {
-    height: "40%",
+    height: "50%",
     width: "80%",
     backgroundColor: "whitesmoke",
     alignItems: "center",

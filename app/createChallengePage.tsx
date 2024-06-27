@@ -3,7 +3,7 @@ import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
-import { Picker } from "@react-native-picker/picker";
+import { Dropdown } from "react-native-element-dropdown";
 import { Link, useLocalSearchParams } from "expo-router";
 import { SetStateAction, useEffect, useState } from "react";
 import {
@@ -14,7 +14,6 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import takePicturePage from "./takePicturePage";
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -104,34 +103,42 @@ export default function CreateChallenge() {
             onChangeText={setCurrentWord}
             style={styles.input}
           />
-          <Picker
-            selectedValue={selectedWordType}
-            style={[styles.picker, styles.input]}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedWordType(itemValue)
-            }
-          >
-            <Picker.Item label="Verb" value="verb" />
-            <Picker.Item label="Noun" value="noun" />
-            <Picker.Item label="Adjective" value="adjective" />
-          </Picker>
-          <Picker
-            selectedValue={selectedWordNumber}
-            style={[styles.picker, styles.input]}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedWordNumber(itemValue)
-            }
-          >
-            <Picker.Item label="" value="undefined" />
-            <Picker.Item label="Singular" value="singular" />
-            <Picker.Item label="Plural" value="plural" />
-          </Picker>
+          <Dropdown
+            style={[styles.selector, styles.input]}
+            data={[
+              { label: 'Verb', value: 'verb' },
+              { label: 'Noun', value: 'noun' },
+              { label: 'Adjective', value: 'adjective' },
+            ]}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Word Type"
+            value={selectedWordType}
+            onChange={item => {
+              setSelectedWordType(item.value as "verb" | "noun" | "adjective");
+            }}
+          />
+          <Dropdown
+            style={[styles.selector, styles.input]}
+            data={[
+              { label: '', value: 'undefined' },
+              { label: 'Singular', value: 'singular' },
+              { label: 'Plural', value: 'plural' },
+            ]}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Word Number"
+            value={selectedWordNumber}
+            onChange={item => {
+              setSelectedWordNumber(item.value as "singular" | "plural" | undefined);
+            }}
+          />
           <Link href="/takePicturePage" asChild>
-          <Pressable>
-          <MaterialIcons name="camera-alt" color="black" size={30} />
-          <ThemedText>Take pic</ThemedText>
-          </Pressable>
-        </Link>
+            <Pressable>
+              <MaterialIcons name="camera-alt" color="black" size={30} />
+              <ThemedText>Take pic</ThemedText>
+            </Pressable>
+          </Link>
         </View>
       </WordsModal>
     </View>
@@ -260,13 +267,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     width: "100%",
   },
-  picker: {
+  selector: {
     height: 50,
     width: 150,
   },
   centered: {
     flex: 1,
     padding: 10,
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 });

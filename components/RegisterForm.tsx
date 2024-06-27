@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import server from "../app/api-client";
+import { router } from "expo-router";
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
@@ -43,6 +44,7 @@ export default function RegisterForm() {
         username,
         password,
       });
+      router.replace("/mainMenuPage");
       console.log("Player registered!");
     } catch (error) {
       console.error(error);

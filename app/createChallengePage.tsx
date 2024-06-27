@@ -3,7 +3,7 @@ import { Words } from "@/components/Words";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Link, useLocalSearchParams } from "expo-router";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -15,7 +15,9 @@ import {
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<keyof Words | null>(null);
+  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
+    keyof Words | null
+  >(null);
   const [words, setWords] = useState<Words>({
     firstWord: { word: "", picture: "" },
     secondWord: { word: "", picture: "" },
@@ -25,6 +27,10 @@ export default function CreateChallenge() {
   const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
 
+  useEffect(() => {
+    console.log("Updated words state:", words);
+  }, [words]);
+
   const onModalClose = () => {
     useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
   };
@@ -33,7 +39,10 @@ export default function CreateChallenge() {
     if (selectedKeywordIndex !== null) {
       const updatedWords = {
         ...words,
-        [selectedKeywordIndex]: { ...words[selectedKeywordIndex], word: currentWord },
+        [selectedKeywordIndex]: {
+          ...words[selectedKeywordIndex],
+          word: currentWord,
+        },
       };
       setWords(updatedWords);
     }
@@ -134,7 +143,12 @@ function replacePlaceholdersWithLinks(
   setCurrentWord: (word: string) => void,
   words: Words
 ): JSX.Element[] {
-  const keywordMapping: (keyof Words)[] = ['firstWord', 'secondWord', 'thirdWord', 'fourthWord'];
+  const keywordMapping: (keyof Words)[] = [
+    "firstWord",
+    "secondWord",
+    "thirdWord",
+    "fourthWord",
+  ];
   const parts = plot.split(/(\$\d+)/g);
 
   return parts.map((part, index) => {
@@ -142,19 +156,24 @@ function replacePlaceholdersWithLinks(
     if (match) {
       const keywordIndex = parseInt(match[1], 10) - 1;
       const keywordKey = keywordMapping[keywordIndex];
-      const chosenWord = words[keywordKey].word || `____${keywordIndex + 1}`;
-      return (
-        <Pressable
-          key={index}
-          onPress={() => {
-            setSelectedKeywordIndex(keywordKey);
-            setCurrentWord(words[keywordKey].word || "");
-            setIsModalVisible(true);
-          }}
-        >
-          <Text style={styles.link}>{chosenWord}</Text>
-        </Pressable>
-      );
+
+      if (keywordKey in words) {
+        const chosenWord = words[keywordKey].word || `____${keywordIndex + 1}`;
+        return (
+          <Pressable
+            key={index}
+            onPress={() => {
+              setSelectedKeywordIndex(keywordKey);
+              setCurrentWord(words[keywordKey].word || "");
+              setIsModalVisible(true);
+            }}
+          >
+            <Text style={styles.link}>{chosenWord}</Text>
+          </Pressable>
+        );
+      } else {
+        return <Text key={index}>Invalid Keyword</Text>;
+      }
     }
     return <Text key={index}>{part}</Text>;
   });

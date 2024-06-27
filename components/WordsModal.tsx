@@ -2,12 +2,14 @@ import React, { ReactNode } from "react";
 import { View, StyleSheet, Modal, Pressable } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Words } from "./Words";
 
 type WordsModalProps = {
   isVisible: boolean;
   children: ReactNode;
-  wordNumber: number | null;
+  wordNumber: keyof Words | null;
   onClose: () => void;
+  onSave: () => void;
 };
 
 export default function WordsModal({
@@ -15,6 +17,7 @@ export default function WordsModal({
   children,
   wordNumber,
   onClose,
+  onSave,
 }: WordsModalProps) {
   return (
     <Modal animationType="fade" transparent={true} visible={isVisible}>
@@ -27,6 +30,9 @@ export default function WordsModal({
             </Pressable>
           </View>
           {children}
+          <Pressable onPress={onSave}>
+            <MaterialIcons name="check-circle" color="black" size={30} />
+          </Pressable>
         </View>
       </View>
     </Modal>

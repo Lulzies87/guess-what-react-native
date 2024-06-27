@@ -1,8 +1,9 @@
 import { ThemedText } from "@/components/ThemedText";
+import { Words } from "@/components/Words";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -14,21 +15,29 @@ import {
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<number | null>(null);
-  const [words, setWords] = useState(["", "", "", ""]);
+  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<keyof Words | null>(null);
+  const [words, setWords] = useState<Words>({
+    firstWord: { word: "", picture: "" },
+    secondWord: { word: "", picture: "" },
+    thirdWord: { word: "", picture: "" },
+    fourthWord: { word: "", picture: "" },
+  });
   const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
 
   const onModalClose = () => {
+    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
+  };
+
+  const onModalSave = () => {
     if (selectedKeywordIndex !== null) {
-      const updatedWords = [...words];
-      updatedWords[selectedKeywordIndex] = currentWord;
-      console.log("Updated words before setting state:", updatedWords);  // Debugging log
+      const updatedWords = {
+        ...words,
+        [selectedKeywordIndex]: { ...words[selectedKeywordIndex], word: currentWord },
+      };
       setWords(updatedWords);
     }
-    setIsModalVisible(false);
-    setSelectedKeywordIndex(null);
-    setCurrentWord("");
+    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
   };
 
   return (
@@ -51,18 +60,17 @@ export default function CreateChallenge() {
       <WordsModal
         isVisible={isModalVisible}
         onClose={onModalClose}
+        onSave={onModalSave}
         wordNumber={selectedKeywordIndex}
       >
         <View style={styles.wordsModalContainer}>
-          <Label htmlFor="chosenWord">
-            Choose Word
-            <TextInput
-              id="chosenWord"
-              value={currentWord}
-              onChangeText={setCurrentWord}
-              style={styles.input}
-            />
-          </Label>
+          <ThemedText type="defaultSemiBold">Choose Word</ThemedText>
+          <TextInput
+            id="chosenWord"
+            value={currentWord}
+            onChangeText={setCurrentWord}
+            style={styles.input}
+          />
         </View>
       </WordsModal>
     </View>
@@ -72,10 +80,29 @@ export default function CreateChallenge() {
 type StoryProps = {
   randomStoryNumber: number;
   setIsModalVisible: (visible: boolean) => void;
-  setSelectedKeywordIndex: (index: number | null) => void;
+  setSelectedKeywordIndex: (index: keyof Words | null) => void;
   setCurrentWord: (word: string) => void;
-  words: string[];
+  words: Words;
 };
+
+function useExitModal(
+  setIsModalVisible: {
+    (value: SetStateAction<boolean>): void;
+    (arg0: boolean): void;
+  },
+  setSelectedKeywordIndex: {
+    (value: SetStateAction<keyof Words | null>): void;
+    (arg0: null): void;
+  },
+  setCurrentWord: {
+    (value: SetStateAction<string>): void;
+    (arg0: string): void;
+  }
+) {
+  setIsModalVisible(false);
+  setSelectedKeywordIndex(null);
+  setCurrentWord("");
+}
 
 function Story({
   randomStoryNumber,
@@ -103,22 +130,25 @@ function Story({
 function replacePlaceholdersWithLinks(
   plot: string,
   setIsModalVisible: (visible: boolean) => void,
-  setSelectedKeywordIndex: (index: number | null) => void,
+  setSelectedKeywordIndex: (index: keyof Words | null) => void,
   setCurrentWord: (word: string) => void,
-  words: string[]
+  words: Words
 ): JSX.Element[] {
+  const keywordMapping: (keyof Words)[] = ['firstWord', 'secondWord', 'thirdWord', 'fourthWord'];
   const parts = plot.split(/(\$\d+)/g);
+
   return parts.map((part, index) => {
     const match = part.match(/\$(\d+)/);
     if (match) {
-      const keywordIndex = parseInt(match[1], 10);
-      const chosenWord = words[keywordIndex] || `____${keywordIndex + 1}`;
+      const keywordIndex = parseInt(match[1], 10) - 1;
+      const keywordKey = keywordMapping[keywordIndex];
+      const chosenWord = words[keywordKey].word || `____${keywordIndex + 1}`;
       return (
         <Pressable
           key={index}
           onPress={() => {
-            setSelectedKeywordIndex(keywordIndex);
-            setCurrentWord(words[keywordIndex] || "");
+            setSelectedKeywordIndex(keywordKey);
+            setCurrentWord(words[keywordKey].word || "");
             setIsModalVisible(true);
           }}
         >
@@ -129,18 +159,6 @@ function replacePlaceholdersWithLinks(
     return <Text key={index}>{part}</Text>;
   });
 }
-
-const Label = ({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: React.ReactNode;
-}) => (
-  <View style={{ marginVertical: 8 }}>
-    <Text>{children}</Text>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {

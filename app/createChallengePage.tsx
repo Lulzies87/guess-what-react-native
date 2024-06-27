@@ -1,7 +1,9 @@
 import { ThemedText } from "@/components/ThemedText";
-import { Words } from "@/components/Words";
+import { ValueOfKey, WordDescription, Words } from "@/components/Words";
+import { MaterialIcons } from "@expo/vector-icons";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
+import { Picker } from "@react-native-picker/picker";
 import { Link, useLocalSearchParams } from "expo-router";
 import { SetStateAction, useEffect, useState } from "react";
 import {
@@ -12,6 +14,7 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
+import takePicturePage from "./takePicturePage";
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -19,20 +22,30 @@ export default function CreateChallenge() {
     keyof Words | null
   >(null);
   const [words, setWords] = useState<Words>({
-    firstWord: { word: "", picture: "" },
-    secondWord: { word: "", picture: "" },
-    thirdWord: { word: "", picture: "" },
-    fourthWord: { word: "", picture: "" },
+    firstWord: { word: "", description: { wordType: "verb" }, picture: "" },
+    secondWord: { word: "", description: { wordType: "verb" }, picture: "" },
+    thirdWord: { word: "", description: { wordType: "verb" }, picture: "" },
+    fourthWord: { word: "", description: { wordType: "verb" }, picture: "" },
   });
   const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
+  const [selectedWordType, setSelectedWordType] =
+    useState<ValueOfKey<WordDescription, "wordType">>("verb");
+  const [selectedWordNumber, setSelectedWordNumber] =
+    useState<ValueOfKey<WordDescription, "number">>(undefined);
 
   useEffect(() => {
     console.log("Updated words state:", words);
   }, [words]);
 
   const onModalClose = () => {
-    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
+    useExitModal(
+      setIsModalVisible,
+      setSelectedKeywordIndex,
+      setCurrentWord,
+      setSelectedWordType,
+      setSelectedWordNumber
+    );
   };
 
   const onModalSave = () => {
@@ -42,11 +55,22 @@ export default function CreateChallenge() {
         [selectedKeywordIndex]: {
           ...words[selectedKeywordIndex],
           word: currentWord,
+          description: {
+            ...words[selectedKeywordIndex].description,
+            wordType: selectedWordType,
+            number: selectedWordNumber,
+          },
         },
       };
       setWords(updatedWords);
     }
-    useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
+    useExitModal(
+      setIsModalVisible,
+      setSelectedKeywordIndex,
+      setCurrentWord,
+      setSelectedWordType,
+      setSelectedWordNumber
+    );
   };
 
   return (
@@ -80,6 +104,34 @@ export default function CreateChallenge() {
             onChangeText={setCurrentWord}
             style={styles.input}
           />
+          <Picker
+            selectedValue={selectedWordType}
+            style={[styles.picker, styles.input]}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedWordType(itemValue)
+            }
+          >
+            <Picker.Item label="Verb" value="verb" />
+            <Picker.Item label="Noun" value="noun" />
+            <Picker.Item label="Adjective" value="adjective" />
+          </Picker>
+          <Picker
+            selectedValue={selectedWordNumber}
+            style={[styles.picker, styles.input]}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedWordNumber(itemValue)
+            }
+          >
+            <Picker.Item label="" value="undefined" />
+            <Picker.Item label="Singular" value="singular" />
+            <Picker.Item label="Plural" value="plural" />
+          </Picker>
+          <Link href="/takePicturePage" asChild>
+          <Pressable>
+          <MaterialIcons name="camera-alt" color="black" size={30} />
+          <ThemedText>Take pic</ThemedText>
+          </Pressable>
+        </Link>
         </View>
       </WordsModal>
     </View>
@@ -95,22 +147,21 @@ type StoryProps = {
 };
 
 function useExitModal(
-  setIsModalVisible: {
-    (value: SetStateAction<boolean>): void;
-    (arg0: boolean): void;
-  },
-  setSelectedKeywordIndex: {
-    (value: SetStateAction<keyof Words | null>): void;
-    (arg0: null): void;
-  },
-  setCurrentWord: {
-    (value: SetStateAction<string>): void;
-    (arg0: string): void;
-  }
+  setIsModalVisible: (value: SetStateAction<boolean>) => void,
+  setSelectedKeywordIndex: (value: SetStateAction<keyof Words | null>) => void,
+  setCurrentWord: (value: SetStateAction<string>) => void,
+  setSelectedWordType: (
+    value: SetStateAction<"verb" | "noun" | "adjective">
+  ) => void,
+  setSelectedWordNumber: (
+    value: SetStateAction<"singular" | "plural" | undefined>
+  ) => void
 ) {
   setIsModalVisible(false);
   setSelectedKeywordIndex(null);
   setCurrentWord("");
+  setSelectedWordType("verb");
+  setSelectedWordNumber(undefined);
 }
 
 function Story({
@@ -154,7 +205,7 @@ function replacePlaceholdersWithLinks(
   return parts.map((part, index) => {
     const match = part.match(/\$(\d+)/);
     if (match) {
-      const keywordIndex = parseInt(match[1], 10) - 1;
+      const keywordIndex = parseInt(match[1], 10);
       const keywordKey = keywordMapping[keywordIndex];
 
       if (keywordKey in words) {
@@ -209,4 +260,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     width: "100%",
   },
+  picker: {
+    height: 50,
+    width: 150,
+  },
+  centered: {
+    flex: 1,
+    padding: 10,
+    alignItems: "center"
+  }
 });

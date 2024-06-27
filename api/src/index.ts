@@ -13,6 +13,7 @@ const app = express();
 
 app.use(cors());
 app.use(json());
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -106,10 +107,10 @@ app.post("/upload", upload.single("image"), (req, res) => {
     }
 
     const fileName = req.file.filename;
-    const filePath = path.join(__dirname, "public", "images", fileName);
+    const fileUrl = `/images/${fileName}`;
 
     console.log("Image uploaded!", req.file);
-    res.status(200).json({ fileName, filePath });
+    res.status(200).json({ fileName, fileUrl });
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error uploading image:", error.message);
@@ -119,6 +120,12 @@ app.post("/upload", upload.single("image"), (req, res) => {
       res.status(500).json({ error: "Unexpected error occurred" });
     }
   }
+});
+
+app.get("/loadChallenge", (_, res) => {
+  const imageUrl = `${process.env.SERVER_URL}/images/image-1719500968682-542936764.jpg`;
+
+  res.status(200).json({ imageUrl });
 });
 
 async function init() {

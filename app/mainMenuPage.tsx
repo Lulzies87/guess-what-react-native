@@ -12,6 +12,10 @@ export default function MainMenu() {
     setIsModalVisible(false);
   };
 
+  const onLogout = () => {
+    router.replace("/loginPage");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -23,7 +27,9 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              router.navigate(`/createChallengePage?id=${getRandomStoryNumber(stories)}`);
+              router.navigate(
+                `/createChallengePage?id=${getRandomStoryNumber(stories)}`
+              );
             }}
           >
             Create a Challenge
@@ -74,6 +80,13 @@ export default function MainMenu() {
           </ThemedText>
         </Pressable>
       </View>
+      <View style={styles.footer}>
+        <Pressable>
+          <ThemedText type="link" onPress={onLogout}>
+            Logout
+          </ThemedText>
+        </Pressable>
+      </View>
 
       <SettingsModal isVisible={isModalVisible} onClose={onModalClose}>
         <View style={styles.settingsContainer}>
@@ -96,7 +109,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   buttonsContainer: {
-    flex: 1,
+    flex: 8,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -107,5 +120,10 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+  footer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

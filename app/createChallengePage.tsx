@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/ThemedText";
+import { Words } from "@/components/Words";
 import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -14,10 +15,13 @@ import {
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
-    number | null
-  >(null);
-  const [words, setWords] = useState(["", "", "", ""]);
+  const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<keyof Words | null>(null);
+  const [words, setWords] = useState<Words>({
+    firstWord: { word: "", picture: "" },
+    secondWord: { word: "", picture: "" },
+    thirdWord: { word: "", picture: "" },
+    fourthWord: { word: "", picture: "" },
+  });
   const [currentWord, setCurrentWord] = useState("");
   const params = useLocalSearchParams();
 
@@ -27,8 +31,10 @@ export default function CreateChallenge() {
 
   const onModalSave = () => {
     if (selectedKeywordIndex !== null) {
-      const updatedWords = [...words];
-      updatedWords[selectedKeywordIndex] = currentWord;
+      const updatedWords = {
+        ...words,
+        [selectedKeywordIndex]: { ...words[selectedKeywordIndex], word: currentWord },
+      };
       setWords(updatedWords);
     }
     useExitModal(setIsModalVisible, setSelectedKeywordIndex, setCurrentWord);
@@ -74,9 +80,9 @@ export default function CreateChallenge() {
 type StoryProps = {
   randomStoryNumber: number;
   setIsModalVisible: (visible: boolean) => void;
-  setSelectedKeywordIndex: (index: number | null) => void;
+  setSelectedKeywordIndex: (index: keyof Words | null) => void;
   setCurrentWord: (word: string) => void;
-  words: string[];
+  words: Words;
 };
 
 function useExitModal(
@@ -85,7 +91,7 @@ function useExitModal(
     (arg0: boolean): void;
   },
   setSelectedKeywordIndex: {
-    (value: SetStateAction<number | null>): void;
+    (value: SetStateAction<keyof Words | null>): void;
     (arg0: null): void;
   },
   setCurrentWord: {
@@ -124,22 +130,25 @@ function Story({
 function replacePlaceholdersWithLinks(
   plot: string,
   setIsModalVisible: (visible: boolean) => void,
-  setSelectedKeywordIndex: (index: number | null) => void,
+  setSelectedKeywordIndex: (index: keyof Words | null) => void,
   setCurrentWord: (word: string) => void,
-  words: string[]
+  words: Words
 ): JSX.Element[] {
+  const keywordMapping: (keyof Words)[] = ['firstWord', 'secondWord', 'thirdWord', 'fourthWord'];
   const parts = plot.split(/(\$\d+)/g);
+
   return parts.map((part, index) => {
     const match = part.match(/\$(\d+)/);
     if (match) {
-      const keywordIndex = parseInt(match[1], 10);
-      const chosenWord = words[keywordIndex] || `____${keywordIndex + 1}`;
+      const keywordIndex = parseInt(match[1], 10) - 1;
+      const keywordKey = keywordMapping[keywordIndex];
+      const chosenWord = words[keywordKey].word || `____${keywordIndex + 1}`;
       return (
         <Pressable
           key={index}
           onPress={() => {
-            setSelectedKeywordIndex(keywordIndex);
-            setCurrentWord(words[keywordIndex] || "");
+            setSelectedKeywordIndex(keywordKey);
+            setCurrentWord(words[keywordKey].word || "");
             setIsModalVisible(true);
           }}
         >

@@ -2,11 +2,12 @@ import React, { ReactNode } from "react";
 import { View, StyleSheet, Modal, Pressable } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Words } from "./Words";
 
 type WordsModalProps = {
   isVisible: boolean;
   children: ReactNode;
-  wordNumber: number | null;
+  wordNumber: keyof Words | null;
   onClose: () => void;
   onSave: () => void;
 };

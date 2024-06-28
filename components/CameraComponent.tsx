@@ -9,11 +9,16 @@ import {
   Image,
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
-import server from "../app/api-client";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 
-export default function CameraComponent() {
+interface CameraCompponentProps {
+  onPhotoUriReady: (uri: string) => void;
+}
+
+export default function CameraComponent({
+  onPhotoUriReady,
+}: CameraCompponentProps) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [resizedPhotoUri, setResizedPhotoUri] = useState<string | null>(null);
@@ -52,28 +57,8 @@ export default function CameraComponent() {
 
   const onSubmitPicture = () => {
     if (resizedPhotoUri) {
-      uploadImage(resizedPhotoUri);
+      onPhotoUriReady(resizedPhotoUri);
       onClose(); // navigating back to previous route in navigation history
-    }
-  };
-
-  const uploadImage = async (uri: string) => {
-    const formData = new FormData();
-    formData.append("image", {
-      uri,
-      type: "image/jpeg",
-      name: `image_${Date.now()}.jpg`,
-    } as any);
-
-    try {
-      const res = await server.post("/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("Image uploaded successfully:", res.data);
-    } catch (error) {
-      console.error("Error uploading image:", JSON.stringify(error));
     }
   };
 

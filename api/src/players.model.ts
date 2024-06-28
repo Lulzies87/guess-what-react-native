@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { Story, storySchema } from "./stories.model";
+import { challengeSchema } from "./challenges.model";
 
 type Player = {
   username: string;
@@ -7,7 +7,7 @@ type Player = {
   timeRegistered: Date;
   points: number;
   friends: string[];
-  savedStories: Story[];
+  pendingChallenges: Object[];
 };
 
 const playerSchema = new Schema<Player>({
@@ -16,7 +16,7 @@ const playerSchema = new Schema<Player>({
   timeRegistered: { type: Schema.Types.Date, default: () => new Date() },
   points: { type: Number, required: true, default: 0 },
   friends: { type: [String], required: true, default: [] },
-  savedStories: { type: [storySchema], required: false },
+  pendingChallenges: { type: [challengeSchema], required: false },
 });
 
 export const Player = model<Player>("Player", playerSchema, "players");

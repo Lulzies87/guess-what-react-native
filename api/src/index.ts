@@ -8,11 +8,14 @@ import fs from "fs";
 import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
+import { Challenge } from "./challenges.model";
+import { Story } from "./stories.model";
 
 const app = express();
 
 app.use(cors());
 app.use(json());
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -114,6 +117,29 @@ app.post("/upload", upload.single("image"), (req, res) => {
       console.error("Unexpected error:", error);
       res.status(500).json({ error: "Unexpected error occurred" });
     }
+  }
+});
+
+app.get("/challenge/:id", async (req, res) => {
+  const challengeId = req.params.id;
+
+  if (!challengeId) {
+    res.status(400).json({ error: "Challenge ID is required" });
+  }
+
+  try {
+    const challengeData = await Challenge.findById(challengeId).select("-_id");
+
+    if (!challengeData) {
+      return res.status(404).json({ error: "Challenge not found" });
+    }
+
+    const storyData = await Story.findById(challengeData.storyId).select("-_id");
+
+    res.status(200).json({challengeData, storyData});
+  } catch (error) {
+    console.error("Error fetching challenge data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

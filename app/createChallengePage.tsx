@@ -1,3 +1,14 @@
+import React, { useState, useEffect, SetStateAction } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Pressable,
+  TextInput,
+  Modal,
+} from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -5,18 +16,31 @@ import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Dropdown } from "react-native-element-dropdown";
 import { Link, useLocalSearchParams } from "expo-router";
-import { SetStateAction, useEffect, useState } from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-  Pressable,
-  TextInput,
-  ScrollView,
-  Modal,
-} from "react-native";
 import CameraComponent from "@/components/CameraComponent";
+import server from "./api-client";
+
+const defaultStoryId = "6677bdc332cb84d89877964e";
+const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
+
+const uploadImage = async (uri: string) => {
+  const formData = new FormData();
+  formData.append("image", {
+    uri,
+    type: "image/jpeg",
+    name: `image_${Date.now()}.jpg`,
+  } as any);
+
+  try {
+    const res = await server.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log("Image uploaded successfully:", res.data);
+  } catch (error) {
+    console.error("Error uploading image:", JSON.stringify(error));
+  }
+};
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -91,6 +115,62 @@ export default function CreateChallenge() {
     setCurrentPhotoURI(null);
   };
 
+  const prepareChallengeData = () => {
+    const data = {
+      storyId: defaultStoryId,
+      challengeCreatorId: defaultChallengeCreatorId,
+      chosenWords: {
+        firstWord: {
+          word: words.firstWord.word,
+          description: {
+            wordType: words.firstWord.description.wordType,
+            wordNumber: words.firstWord.description.number,
+          },
+          imageName: words.firstWord.picture,
+        },
+        secondWord: {
+          word: words.secondWord.word,
+          description: {
+            wordType: words.secondWord.description.wordType,
+            wordNumber: words.secondWord.description.number,
+          },
+          imageName: words.secondWord.picture,
+        },
+        thirdWord: {
+          word: words.thirdWord.word,
+          description: {
+            wordType: words.thirdWord.description.wordType,
+            wordNumber: words.thirdWord.description.number,
+          },
+          imageName: words.thirdWord.picture,
+        },
+        fourthWord: {
+          word: words.fourthWord.word,
+          description: {
+            wordType: words.fourthWord.description.wordType,
+            wordNumber: words.fourthWord.description.number,
+          },
+          imageName: words.fourthWord.picture,
+        },
+      },
+    };
+
+    return data;
+  };
+
+  const handlePostChallenge = async () => {
+    const challengeData = prepareChallengeData();
+
+    console.log("Prepared Challenge Data:", challengeData);
+
+    try {
+      const response = await server.post("/challenge", challengeData);
+      console.log("Challenge created successfully:", response.data);
+    } catch (error) {
+      console.error("Error creating challenge:", error);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -109,6 +189,9 @@ export default function CreateChallenge() {
           setCurrentWord={setCurrentWord}
           words={words}
         />
+        <TouchableOpacity onPress={handlePostChallenge}>
+          <Text>Send Challenge</Text>
+        </TouchableOpacity>
         <WordsModal
           isVisible={isModalVisible}
           onClose={onModalClose}

@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-// import { useNavigation } from "expo-router";
 
 interface CameraCompponentProps {
   onPhotoUriReady: (uri: string | null) => void;

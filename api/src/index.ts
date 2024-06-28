@@ -31,10 +31,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.get("/check", (_, res) => {
-  res.status(200).json("Hello");
-});
-
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -88,7 +84,7 @@ app.post("/register", async (req, res) => {
       timeRegistered: new Date(),
       point: 0,
       friends: [],
-      savedStories: [],
+      pendingChallenges: [],
     });
 
     await newPlayer.save();

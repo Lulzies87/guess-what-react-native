@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/ThemedText";
-import { Challenge, Word } from "@/models/challenge.model";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -11,6 +10,7 @@ import {
   Button,
 } from "react-native";
 import server from "../api-client";
+import { Challenge, Word } from "@/models/Challenge.model";
 
 export default function TakeChallenge() {
   const { id } = useLocalSearchParams();
@@ -19,6 +19,8 @@ export default function TakeChallenge() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [userGuess, setUserGuess] = useState("");
   const [words, setWords] = useState<Word[]>([]);
+
+  const currentWord = words[currentWordIndex];
 
   const handleNext = () => {
     if (currentWordIndex < words.length - 1) {
@@ -69,7 +71,7 @@ export default function TakeChallenge() {
       </ThemedText>
       <Image
         source={{
-          uri: `http://192.168.50.237:3000/images/${currentWord.imageName}`,
+          uri: `http://192.168.50.237:3000/images/image-1719500968682-542936764.jpg`,
         }}
         style={styles.image}
       />
@@ -103,7 +105,6 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   image: {
-    // backgroundColor: "red",
     width: 200,
     height: 200,
     marginBottom: 20,

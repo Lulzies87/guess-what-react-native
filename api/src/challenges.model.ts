@@ -5,8 +5,8 @@ type Word = {
   description: {
     wordType: "verb" | "noun" | "adjective";
     wordNumber: "singular" | "plural";
-    imageName: string;
   };
+  imageName: string;
 };
 
 export type Challenge = {

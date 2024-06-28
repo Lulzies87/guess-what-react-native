@@ -9,11 +9,13 @@ import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
 import { Challenge } from "./challenges.model";
+import { Story } from "./stories.model";
 
 const app = express();
 
 app.use(cors());
 app.use(json());
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -132,7 +134,9 @@ app.get("/challenge/:id", async (req, res) => {
       return res.status(404).json({ error: "Challenge not found" });
     }
 
-    res.status(200).json(challengeData);
+    const storyData = await Story.findById(challengeData.storyId).select("-_id");
+
+    res.status(200).json({challengeData, storyData});
   } catch (error) {
     console.error("Error fetching challenge data:", error);
     res.status(500).json({ error: "Internal server error" });

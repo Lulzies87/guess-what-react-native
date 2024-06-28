@@ -134,11 +134,30 @@ app.get("/challenge/:id", async (req, res) => {
       return res.status(404).json({ error: "Challenge not found" });
     }
 
-    const storyData = await Story.findById(challengeData.storyId).select("-_id");
+    const storyData = await Story.findById(challengeData.storyId).select(
+      "-_id"
+    );
 
-    res.status(200).json({challengeData, storyData});
+    res.status(200).json({ challengeData, storyData });
   } catch (error) {
     console.error("Error fetching challenge data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/story/:id", async (req, res) => {
+  const storyId = req.params.id;
+
+  if (!storyId) {
+    res.status(400).json({ error: "Story ID is required" });
+  }
+
+  try {
+    const storyData = await Story.findById(storyId).select("-id");
+
+    res.status(200).json(storyData?.plot);
+  } catch (error) {
+    console.error("Error fetching story data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -36,19 +36,30 @@ export default function ChallengeSummary({
     return parts.map((part, index) => {
       if (part.startsWith("$")) {
         const wordIndex = parseInt(part.slice(1), 10);
+        const isCorrect =
+          guessedWords[wordIndex] === correctWords[wordIndex].word;
+        const wordStyle = isCorrect ? styles.correctWord : styles.incorrectWord;
         return (
-          <ThemedText key={index} style={styles.guessedWord}>
+          <ThemedText key={index} style={wordStyle}>
             {guessedWords[wordIndex]}
           </ThemedText>
         );
       }
-      return (
-        <ThemedText key={index} style={styles.storyText}>
-          {part}
-        </ThemedText>
-      );
+      return <ThemedText key={index}>{part}</ThemedText>;
     });
   };
+
+  const calculateScore = () => {
+    let score = 0;
+    guessedWords.forEach((word, index) => {
+      if (word === correctWords[index].word) {
+        score += 25;
+      }
+    });
+    return score;
+  };
+
+  const score: number = calculateScore();
 
   return (
     <View style={styles.container}>
@@ -56,6 +67,7 @@ export default function ChallengeSummary({
       <ThemedText style={styles.content}>
         {storyPlot ? renderStory(storyPlot) : "No story found"}
       </ThemedText>
+      <ThemedText type="subtitle">Your Score: {score} / 100</ThemedText>
     </View>
   );
 }
@@ -64,7 +76,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
     padding: 20,
   },
   title: {
@@ -74,13 +85,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     textAlign: "center",
   },
-  storyText: {
-    fontSize: 16,
-    color: "#000",
+  correctWord: {
+    color: "green",
   },
-  guessedWord: {
-    fontSize: 16,
-    color: "blue",
-    fontWeight: "bold",
+  incorrectWord: {
+    color: "red",
   },
 });

@@ -30,12 +30,57 @@ export default function ChallengeSummary({
     getStoryPlot(storyId);
   });
 
+  const renderStory = (storyPlot: string) => {
+    const parts = storyPlot.split(/(\$\d+)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("$")) {
+        const wordIndex = parseInt(part.slice(1), 10);
+        return (
+          <ThemedText key={index} style={styles.guessedWord}>
+            {guessedWords[wordIndex]}
+          </ThemedText>
+        );
+      }
+      return (
+        <ThemedText key={index} style={styles.storyText}>
+          {part}
+        </ThemedText>
+      );
+    });
+  };
+
   return (
-    <View>
-      <ThemedText type="title">Your story</ThemedText>
-      <ThemedText>{storyPlot}</ThemedText>
+    <View style={styles.container}>
+      <ThemedText type="title">Your Story</ThemedText>
+      <ThemedText style={styles.content}>
+        {storyPlot ? renderStory(storyPlot) : "No story found"}
+      </ThemedText>
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    paddingVertical: 20,
+  },
+  content: {
+    paddingVertical: 20,
+    textAlign: "center",
+  },
+  storyText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  guessedWord: {
+    fontSize: 16,
+    color: "blue",
+    fontWeight: "bold",
+  },
+});

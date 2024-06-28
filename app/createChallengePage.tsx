@@ -13,7 +13,10 @@ import {
   Text,
   Pressable,
   TextInput,
+  ScrollView,
+  Modal,
 } from "react-native";
+import CameraComponent from "@/components/CameraComponent";
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -32,6 +35,8 @@ export default function CreateChallenge() {
     useState<ValueOfKey<WordDescription, "wordType">>("verb");
   const [selectedWordNumber, setSelectedWordNumber] =
     useState<ValueOfKey<WordDescription, "number">>(undefined);
+  const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   useEffect(() => {
     console.log("Updated words state:", words);
@@ -43,7 +48,8 @@ export default function CreateChallenge() {
       setSelectedKeywordIndex,
       setCurrentWord,
       setSelectedWordType,
-      setSelectedWordNumber
+      setSelectedWordNumber,
+      setCurrentPhotoURI
     );
   };
 
@@ -59,6 +65,7 @@ export default function CreateChallenge() {
             wordType: selectedWordType,
             number: selectedWordNumber,
           },
+          picture: currentPhotoURI,
         },
       };
       setWords(updatedWords);
@@ -68,80 +75,107 @@ export default function CreateChallenge() {
       setSelectedKeywordIndex,
       setCurrentWord,
       setSelectedWordType,
-      setSelectedWordNumber
+      setSelectedWordNumber,
+      setCurrentPhotoURI
     );
   };
 
+  const handlePhotoUriReady = (uri: string | null) => {
+    setCurrentPhotoURI(uri);
+    setIsCameraVisible(false);
+    setIsModalVisible(true);
+  };
+
+  const onCloseCamera = () => {
+    setIsCameraVisible(false);
+    setCurrentPhotoURI(null);
+  };
+
   return (
-    <View style={styles.container}>
-      <ThemedText style={styles.title} type="title">
-        Create Challenge Page
-      </ThemedText>
-      <Link href={`/`} asChild>
-        <TouchableOpacity>
-          <Text style={styles.link}>Home</Text>
-        </TouchableOpacity>
-      </Link>
-      <Story
-        randomStoryNumber={Number(params.id)}
-        setIsModalVisible={setIsModalVisible}
-        setSelectedKeywordIndex={setSelectedKeywordIndex}
-        setCurrentWord={setCurrentWord}
-        words={words}
-      />
-      <WordsModal
-        isVisible={isModalVisible}
-        onClose={onModalClose}
-        onSave={onModalSave}
-        wordNumber={selectedKeywordIndex}
-      >
-        <View style={styles.wordsModalContainer}>
-          <ThemedText type="defaultSemiBold">Choose Word</ThemedText>
-          <TextInput
-            id="chosenWord"
-            value={currentWord}
-            onChangeText={setCurrentWord}
-            style={styles.input}
-          />
-          <Dropdown
-            style={[styles.selector, styles.input]}
-            data={[
-              { label: 'Verb', value: 'verb' },
-              { label: 'Noun', value: 'noun' },
-              { label: 'Adjective', value: 'adjective' },
-            ]}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Word Type"
-            value={selectedWordType}
-            onChange={item => {
-              setSelectedWordType(item.value as "verb" | "noun" | "adjective");
-            }}
-          />
-          <Dropdown
-            style={[styles.selector, styles.input]}
-            data={[
-              { label: '', value: 'undefined' },
-              { label: 'Singular', value: 'singular' },
-              { label: 'Plural', value: 'plural' },
-            ]}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Word Number"
-            value={selectedWordNumber}
-            onChange={item => {
-              setSelectedWordNumber(item.value as "singular" | "plural" | undefined);
-            }}
-          />
-          <Link href="/takePicturePage" asChild>
-            <Pressable>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <ThemedText style={styles.title} type="title">
+          Create Challenge Page
+        </ThemedText>
+        <Link href={`/`} asChild>
+          <TouchableOpacity>
+            <Text style={styles.link}>Home</Text>
+          </TouchableOpacity>
+        </Link>
+        <Story
+          randomStoryNumber={Number(params.id)}
+          setIsModalVisible={setIsModalVisible}
+          setSelectedKeywordIndex={setSelectedKeywordIndex}
+          setCurrentWord={setCurrentWord}
+          words={words}
+        />
+        <WordsModal
+          isVisible={isModalVisible}
+          onClose={onModalClose}
+          onSave={onModalSave}
+          wordNumber={selectedKeywordIndex}
+        >
+          <View style={styles.wordsModalContainer}>
+            <ThemedText type="defaultSemiBold">Choose Word</ThemedText>
+            <TextInput
+              id="chosenWord"
+              value={currentWord}
+              onChangeText={setCurrentWord}
+              style={styles.input}
+            />
+            <Dropdown
+              style={[styles.selector, styles.input]}
+              data={[
+                { label: "Verb", value: "verb" },
+                { label: "Noun", value: "noun" },
+                { label: "Adjective", value: "adjective" },
+              ]}
+              labelField="label"
+              valueField="value"
+              value={selectedWordType}
+              onChange={(item) => {
+                setSelectedWordType(
+                  item.value as "verb" | "noun" | "adjective"
+                );
+              }}
+            />
+            <Dropdown
+              style={[styles.selector, styles.input]}
+              data={[
+                { label: "", value: "undefined" },
+                { label: "Singular", value: "singular" },
+                { label: "Plural", value: "plural" },
+              ]}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Word Number"
+              value={selectedWordNumber}
+              onChange={(item) => {
+                setSelectedWordNumber(
+                  item.value as "singular" | "plural" | undefined
+                );
+              }}
+            />
+            <Pressable
+              style={[styles.centered]}
+              onPress={() => {
+                setIsModalVisible(false);
+                setIsCameraVisible(true);
+              }}
+            >
               <MaterialIcons name="camera-alt" color="black" size={30} />
               <ThemedText>Take pic</ThemedText>
             </Pressable>
-          </Link>
-        </View>
-      </WordsModal>
-    </View>
+          </View>
+        </WordsModal>
+        <Modal visible={isCameraVisible} animationType="slide">
+          <CameraComponent
+            onPhotoUriReady={handlePhotoUriReady}
+            onClose={onCloseCamera}
+          />
+        </Modal>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -162,13 +196,15 @@ function useExitModal(
   ) => void,
   setSelectedWordNumber: (
     value: SetStateAction<"singular" | "plural" | undefined>
-  ) => void
+  ) => void,
+  setCurrentPhotoURI: (value: SetStateAction<string | null>) => void
 ) {
   setIsModalVisible(false);
   setSelectedKeywordIndex(null);
   setCurrentWord("");
   setSelectedWordType("verb");
   setSelectedWordNumber(undefined);
+  setCurrentPhotoURI(null);
 }
 
 function Story({
@@ -274,6 +310,11 @@ const styles = StyleSheet.create({
   centered: {
     flex: 1,
     padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
     alignItems: "center",
   },
 });

@@ -10,28 +10,25 @@ import {
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+// import { useNavigation } from "expo-router";
 
 interface CameraCompponentProps {
-  onPhotoUriReady: (uri: string) => void;
+  onPhotoUriReady: (uri: string | null) => void;
+  onClose: () => void;
 }
 
 export default function CameraComponent({
   onPhotoUriReady,
+  onClose,
 }: CameraCompponentProps) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [resizedPhotoUri, setResizedPhotoUri] = useState<string | null>(null);
 
   const cameraRef = useRef<CameraView>(null);
-  const navigation = useNavigation();
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
-  };
-
-  const onClose = () => {
-    navigation.goBack();
   };
 
   const onTakePicture = async () => {
@@ -58,8 +55,14 @@ export default function CameraComponent({
   const onSubmitPicture = () => {
     if (resizedPhotoUri) {
       onPhotoUriReady(resizedPhotoUri);
-      onClose(); // navigating back to previous route in navigation history
+      setResizedPhotoUri(null);
     }
+  };
+
+  const onCloseCamera = () => {
+    setResizedPhotoUri(null);
+    onPhotoUriReady(null);
+    onClose();
   };
 
   if (!permission) {
@@ -112,7 +115,7 @@ export default function CameraComponent({
             <TouchableOpacity style={styles.button} onPress={onTakePicture}>
               <AntDesign name="camera" size={34} color="lightgray" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={onClose}>
+            <TouchableOpacity style={styles.button} onPress={onCloseCamera}>
               <AntDesign name="close" size={34} color="lightgray" />
             </TouchableOpacity>
           </View>

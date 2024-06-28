@@ -9,7 +9,7 @@ type Word = {
   imageName: string;
 };
 
-export type Challenge = {
+type Challenge = {
   storyId: string;
   challengeCreatorId: string;
   chosenWords: {
@@ -26,4 +26,4 @@ export const challengeSchema = new Schema<Challenge>({
   chosenWords: { type: Object, required: true },
 });
 
-export const ChallengeModel = model("Challenge", challengeSchema, "challenges");
+export const Challenge = model("Challenge", challengeSchema, "challenges");

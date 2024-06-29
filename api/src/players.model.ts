@@ -7,7 +7,7 @@ type Player = {
   timeRegistered: Date;
   points: number;
   friends: string[];
-  pendingChallenges: Object[];
+  pendingChallenges: string[];
 };
 
 const playerSchema = new Schema<Player>({
@@ -16,7 +16,7 @@ const playerSchema = new Schema<Player>({
   timeRegistered: { type: Schema.Types.Date, default: () => new Date() },
   points: { type: Number, required: true, default: 0 },
   friends: { type: [String], required: true, default: [] },
-  pendingChallenges: { type: [challengeSchema], required: false },
+  pendingChallenges: { type: [String], required: false },
 });
 
 export const Player = model<Player>("Player", playerSchema, "players");

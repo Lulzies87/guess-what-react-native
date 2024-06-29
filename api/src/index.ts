@@ -182,89 +182,89 @@ app.post("/upload", upload.array("images", 4), (req, res) => {
   }
 });
 
-// app.post("/challenge", async (req, res) => {
-//   try {
-//     const { storyId, challengeCreatorId, chosenWords } = req.body;
+app.post("/challenge", async (req, res) => {
+  try {
+    const { storyId, challengeCreatorId, chosenWords } = req.body;
 
-//     if (!storyId || !challengeCreatorId || !chosenWords) {
-//       throw new Error("Missing required fields");
-//     }
+    if (!storyId || !challengeCreatorId || !chosenWords) {
+      throw new Error("Missing required fields");
+    }
 
-//     if (
-//       Object.keys(chosenWords).length !== 4 ||
-//       !chosenWords.firstWord ||
-//       !chosenWords.secondWord ||
-//       !chosenWords.thirdWord ||
-//       !chosenWords.fourthWord ||
-//       !chosenWords.firstWord.word ||
-//       !chosenWords.secondWord.word ||
-//       !chosenWords.thirdWord.word ||
-//       !chosenWords.fourthWord.word ||
-//       !chosenWords.firstWord.imageName ||
-//       !chosenWords.secondWord.imageName ||
-//       !chosenWords.thirdWord.imageName ||
-//       !chosenWords.fourthWord.imageName
-//     ) {
-//       throw new Error("Invalid chosenWords structure");
-//     }
+    if (
+      Object.keys(chosenWords).length !== 4 ||
+      !chosenWords.firstWord ||
+      !chosenWords.secondWord ||
+      !chosenWords.thirdWord ||
+      !chosenWords.fourthWord ||
+      !chosenWords.firstWord.word ||
+      !chosenWords.secondWord.word ||
+      !chosenWords.thirdWord.word ||
+      !chosenWords.fourthWord.word ||
+      !chosenWords.firstWord.imageName ||
+      !chosenWords.secondWord.imageName ||
+      !chosenWords.thirdWord.imageName ||
+      !chosenWords.fourthWord.imageName
+    ) {
+      throw new Error("Invalid chosenWords structure");
+    }
 
-//     const newChallenge = new Challenge({
-//       storyId,
-//       challengeCreatorId,
-//       chosenWords: {
-//         firstWord: {
-//           word: chosenWords.firstWord.word,
-//           description: chosenWords.firstWord.description,
-//           imageName: chosenWords.firstWord.imageName,
-//         },
-//         secondWord: {
-//           word: chosenWords.secondWord.word,
-//           description: chosenWords.secondWord.description,
-//           imageName: chosenWords.secondWord.imageName,
-//         },
-//         thirdWord: {
-//           word: chosenWords.thirdWord.word,
-//           description: chosenWords.thirdWord.description,
-//           imageName: chosenWords.thirdWord.imageName,
-//         },
-//         fourthWord: {
-//           word: chosenWords.fourthWord.word,
-//           description: chosenWords.fourthWord.description,
-//           imageName: chosenWords.fourthWord.imageName,
-//         },
-//       },
-//     });
+    const newChallenge = new Challenge({
+      storyId,
+      challengeCreatorId,
+      chosenWords: {
+        firstWord: {
+          word: chosenWords.firstWord.word,
+          description: chosenWords.firstWord.description,
+          imageName: chosenWords.firstWord.imageName,
+        },
+        secondWord: {
+          word: chosenWords.secondWord.word,
+          description: chosenWords.secondWord.description,
+          imageName: chosenWords.secondWord.imageName,
+        },
+        thirdWord: {
+          word: chosenWords.thirdWord.word,
+          description: chosenWords.thirdWord.description,
+          imageName: chosenWords.thirdWord.imageName,
+        },
+        fourthWord: {
+          word: chosenWords.fourthWord.word,
+          description: chosenWords.fourthWord.description,
+          imageName: chosenWords.fourthWord.imageName,
+        },
+      },
+    });
 
-//     const savedChallenge = await newChallenge.save();
+    const savedChallenge = await newChallenge.save();
 
-//     console.log("New challenge created:", savedChallenge);
-//     res.status(201).json({
-//       message: "Challenge created successfully",
-//       newChallenge: savedChallenge,
-//     });
-//   } catch (error) {
-//     console.error("Error creating challenge:", error);
-//     res.status(500).json({ error: "Failed to create challenge" });
-//   }
-// });
+    console.log("New challenge created:", savedChallenge);
+    res.status(201).json({
+      message: "Challenge created successfully",
+      newChallenge: savedChallenge,
+    });
+  } catch (error) {
+    console.error("Error creating challenge:", error);
+    res.status(500).json({ error: "Failed to create challenge" });
+  }
+});
 
-// app.post("/upload", upload.single("image"), (req, res) => {
-//   try {
-//     if (!req.file) {
-//       throw new Error("File upload failed");
-//     }
-//     console.log("Image uploaded!", req.file);
-//     res.status(200).json({ fileName: req.file!.filename });
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       console.error("Error uploading image:", error.message);
-//       res.status(500).json({ error: "Failed to upload image" });
-//     } else {
-//       console.error("Unexpected error:", error);
-//       res.status(500).json({ error: "Unexpected error occurred" });
-//     }
-//   }
-// });
+app.post("/upload", upload.single("image"), (req, res) => {
+  try {
+    if (!req.file) {
+      throw new Error("File upload failed");
+    }
+    console.log("Image uploaded!", req.file);
+    res.status(200).json({ fileName: req.file!.filename });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error uploading image:", error.message);
+      res.status(500).json({ error: "Failed to upload image" });
+    } else {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ error: "Unexpected error occurred" });
+    }
+  }
+});
 
 app.get("/challenge/:id", async (req, res) => {
   const challengeId = req.params.id;

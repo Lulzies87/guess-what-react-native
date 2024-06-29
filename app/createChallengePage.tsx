@@ -42,7 +42,7 @@ export default function CreateChallenge() {
   const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
-  const pictures = [
+  const pictureURIArray = [
     words.firstWord.picture,
     words.secondWord.picture,
     words.thirdWord.picture,
@@ -52,28 +52,28 @@ export default function CreateChallenge() {
   const uploadImage = async (uriArr: string[]) => {
     const formData = new FormData();
     uriArr.forEach((uri) => {
-      formData.append('images', {
+      formData.append("images", {
         uri,
-        type: 'image/jpeg',
+        type: "image/jpeg",
         name: `image_${Date.now()}.jpg`,
       } as any);
     });
-  
+
     try {
-      const res = await server.post('/upload', formData, {
+      const res = await server.post("/upload", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      console.log('Image uploaded successfully:', res.data);
+      console.log("Image uploaded successfully:", res.data);
     } catch (error) {
-      console.error('Error uploading image:', JSON.stringify(error));
+      console.error("Error uploading image:", JSON.stringify(error));
     }
   };
 
   useEffect(() => {
-    console.log("Updated pictures state:", pictures);
-  }, [pictures]);
+    console.log("Updated pictures state:", pictureURIArray);
+  }, [pictureURIArray]);
 
   const onModalClose = () => {
     useExitModal(
@@ -168,17 +168,17 @@ export default function CreateChallenge() {
   };
 
   const handlePostChallenge = async () => {
-    // const challengeData = prepareChallengeData();
+    const challengeData = prepareChallengeData();
 
-    // console.log("Prepared Challenge Data:", challengeData);
+    console.log("Prepared Challenge Data:", challengeData);
 
-    // try {
-    //   const response = await server.post("/challenge", challengeData);
-    //   console.log("Challenge created successfully:", response.data);
-    uploadImage(pictures);
-    // } catch (error) {
-    //   console.error("Error creating challenge:", error);
-    // }
+    try {
+      const response = await server.post("/challenge", challengeData);
+      console.log("Challenge created successfully:", response.data);
+      uploadImage(pictureURIArray);
+    } catch (error) {
+      console.error("Error creating challenge:", error);
+    }
   };
 
   return (

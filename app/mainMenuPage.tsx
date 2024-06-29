@@ -1,13 +1,28 @@
 import SettingsModal from "@/components/SettingsModal";
 import { ThemedText } from "@/components/ThemedText";
-import { logout } from "@/functions/functions";
+import { fetchUserData, logout } from "@/functions/functions";
+import { User } from "@/models/User.model";
 import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 export default function MainMenu() {
+  const [userData, setUserData] = useState<User | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchUserData();
+        setUserData(data);
+      } catch (error) {
+        console.error("Couldn't fetch user data:", error);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const onModalClose = () => {
     setIsModalVisible(false);
@@ -17,6 +32,8 @@ export default function MainMenu() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <ThemedText type="title">Main Manu Page</ThemedText>
+        <ThemedText type="subtitle">Hello {userData?.username}</ThemedText>
+        <ThemedText>Your points total is {userData?.points}</ThemedText>
       </View>
 
       <View style={styles.buttonsContainer}>

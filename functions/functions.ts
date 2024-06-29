@@ -1,7 +1,8 @@
 import * as SecureStore from "expo-secure-store";
+import server from "../app/api-client";
 import { router } from "expo-router";
 
-export async function getUserToken() {
+export async function fetchUserToken() {
   try {
     const token = await SecureStore.getItemAsync("userToken");
 
@@ -11,9 +12,29 @@ export async function getUserToken() {
   }
 }
 
+export async function fetchUserData() {
+  const token = await fetchUserToken();
+
+  if (!token) {
+    throw new Error("No token found");
+  }
+
+  try {
+    const res = await server.get("/userData", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch user data", error);
+    throw error;
+  }
+}
+
 export async function checkLoginStatus() {
   try {
-    const userToken = await getUserToken();
+    const userToken = await fetchUserToken();
     if (userToken) {
       router.replace("/mainMenuPage");
     } else {

@@ -39,7 +39,7 @@ export default function Home() {
           </Pressable>
         </Link>
 
-        <Link href={"/takeChallengePage"} asChild>
+        <Link href={"/challenge/667e57b9cb49e2f6fa3c9d9d"} asChild>
           <Pressable style={styles.button}>
             <ThemedText style={styles.buttonText}>
               Take Challenge Page

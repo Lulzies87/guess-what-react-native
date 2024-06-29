@@ -1,6 +1,6 @@
 import { Schema, model, Types, Document } from "mongoose";
 
-type Word = {
+export type Word = {
   word: string;
   description: {
     wordType: "verb" | "noun" | "adjective";

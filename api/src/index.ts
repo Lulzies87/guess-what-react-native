@@ -1,10 +1,12 @@
 import "dotenv/config";
+
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
@@ -58,8 +60,13 @@ app.post("/login", async (req, res) => {
     }
 
     const { password: userPassword, ...user } = userData.toObject();
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
 
-    return res.status(200).json(user);
+    return res.status(200).json(token);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -85,13 +92,20 @@ app.post("/register", async (req, res) => {
       username,
       password: hashedPassword,
       timeRegistered: new Date(),
-      point: 0,
+      points: 0,
       friends: [],
       pendingChallenges: [],
     });
 
     await newPlayer.save();
-    res.status(201).json({ message: "Player registered!" });
+
+    const token = jwt.sign(
+      { id: newPlayer._id, username: newPlayer.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json(token);
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal server error" });

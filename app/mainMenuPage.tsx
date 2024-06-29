@@ -1,5 +1,6 @@
 import SettingsModal from "@/components/SettingsModal";
 import { ThemedText } from "@/components/ThemedText";
+import { logout } from "@/functions/functions";
 import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -10,10 +11,6 @@ export default function MainMenu() {
 
   const onModalClose = () => {
     setIsModalVisible(false);
-  };
-
-  const onLogout = () => {
-    router.replace("/loginPage");
   };
 
   return (
@@ -82,7 +79,7 @@ export default function MainMenu() {
       </View>
       <View style={styles.footer}>
         <Pressable>
-          <ThemedText type="link" onPress={onLogout}>
+          <ThemedText type="link" onPress={logout}>
             Logout
           </ThemedText>
         </Pressable>

@@ -22,26 +22,6 @@ import server from "./api-client";
 const defaultStoryId = "6677bdc332cb84d89877964e";
 const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
 
-const uploadImage = async (uri: string) => {
-  const formData = new FormData();
-  formData.append("image", {
-    uri,
-    type: "image/jpeg",
-    name: `image_${Date.now()}.jpg`,
-  } as any);
-
-  try {
-    const res = await server.post("/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    console.log("Image uploaded successfully:", res.data);
-  } catch (error) {
-    console.error("Error uploading image:", JSON.stringify(error));
-  }
-};
-
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
@@ -62,9 +42,38 @@ export default function CreateChallenge() {
   const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
+  const pictures = [
+    words.firstWord.picture,
+    words.secondWord.picture,
+    words.thirdWord.picture,
+    words.fourthWord.picture,
+  ];
+
+  const uploadImage = async (uriArr: string[]) => {
+    const formData = new FormData();
+    uriArr.forEach((uri) => {
+      formData.append('images', {
+        uri,
+        type: 'image/jpeg',
+        name: `image_${Date.now()}.jpg`,
+      } as any);
+    });
+  
+    try {
+      const res = await server.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Image uploaded successfully:', res.data);
+    } catch (error) {
+      console.error('Error uploading image:', JSON.stringify(error));
+    }
+  };
+
   useEffect(() => {
-    console.log("Updated words state:", words);
-  }, [words]);
+    console.log("Updated pictures state:", pictures);
+  }, [pictures]);
 
   const onModalClose = () => {
     useExitModal(
@@ -83,7 +92,7 @@ export default function CreateChallenge() {
         ...words,
         [selectedKeywordIndex]: {
           ...words[selectedKeywordIndex],
-          word: currentWord,
+          word: currentWord.trim().toLowerCase(),
           description: {
             ...words[selectedKeywordIndex].description,
             wordType: selectedWordType,
@@ -159,16 +168,17 @@ export default function CreateChallenge() {
   };
 
   const handlePostChallenge = async () => {
-    const challengeData = prepareChallengeData();
+    // const challengeData = prepareChallengeData();
 
-    console.log("Prepared Challenge Data:", challengeData);
+    // console.log("Prepared Challenge Data:", challengeData);
 
-    try {
-      const response = await server.post("/challenge", challengeData);
-      console.log("Challenge created successfully:", response.data);
-    } catch (error) {
-      console.error("Error creating challenge:", error);
-    }
+    // try {
+    //   const response = await server.post("/challenge", challengeData);
+    //   console.log("Challenge created successfully:", response.data);
+    uploadImage(pictures);
+    // } catch (error) {
+    //   console.error("Error creating challenge:", error);
+    // }
   };
 
   return (

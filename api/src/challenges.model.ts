@@ -9,7 +9,7 @@ export type Word = {
   imageName: string;
 };
 
-export interface Challenge extends Document {
+interface Challenge extends Document {
   storyId: Types.ObjectId;
   challengeCreatorId: Types.ObjectId;
   chosenWords: {
@@ -59,4 +59,4 @@ export const challengeSchema = new Schema<Challenge>({
   },
 });
 
-export const ChallengeModel = model<Challenge>("Challenge", challengeSchema, "challenges");
+export const Challenge = model<Challenge>("Challenge", challengeSchema, "challenges");

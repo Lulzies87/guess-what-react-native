@@ -8,7 +8,7 @@ import fs from "fs";
 import bodyParser, { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
-import { ChallengeModel } from "./challenges.model";
+import { Challenge } from "./challenges.model";
 import { Story } from "./stories.model";
 
 const app = express();
@@ -172,71 +172,81 @@ app.post("/register", async (req, res) => {
 //   }
 // });
 
-app.post("/challenge", async (req, res) => {
+app.post("/upload", upload.array("images", 4), (req, res) => {
   try {
-    const { storyId, challengeCreatorId, chosenWords } = req.body;
-
-    if (!storyId || !challengeCreatorId || !chosenWords) {
-      throw new Error("Missing required fields");
-    }
-
-    if (
-      Object.keys(chosenWords).length !== 4 ||
-      !chosenWords.firstWord ||
-      !chosenWords.secondWord ||
-      !chosenWords.thirdWord ||
-      !chosenWords.fourthWord ||
-      !chosenWords.firstWord.word ||
-      !chosenWords.secondWord.word ||
-      !chosenWords.thirdWord.word ||
-      !chosenWords.fourthWord.word ||
-      !chosenWords.firstWord.imageName ||
-      !chosenWords.secondWord.imageName ||
-      !chosenWords.thirdWord.imageName ||
-      !chosenWords.fourthWord.imageName
-    ) {
-      throw new Error("Invalid chosenWords structure");
-    }
-
-    const newChallenge = new ChallengeModel({
-      storyId,
-      challengeCreatorId,
-      chosenWords: {
-        firstWord: {
-          word: chosenWords.firstWord.word,
-          description: chosenWords.firstWord.description,
-          imageName: chosenWords.firstWord.imageName,
-        },
-        secondWord: {
-          word: chosenWords.secondWord.word,
-          description: chosenWords.secondWord.description,
-          imageName: chosenWords.secondWord.imageName,
-        },
-        thirdWord: {
-          word: chosenWords.thirdWord.word,
-          description: chosenWords.thirdWord.description,
-          imageName: chosenWords.thirdWord.imageName,
-        },
-        fourthWord: {
-          word: chosenWords.fourthWord.word,
-          description: chosenWords.fourthWord.description,
-          imageName: chosenWords.fourthWord.imageName,
-        },
-      },
-    });
-
-    const savedChallenge = await newChallenge.save();
-
-    console.log("New challenge created:", savedChallenge);
-    res.status(201).json({
-      message: "Challenge created successfully",
-      newChallenge: savedChallenge,
-    });
+    console.log("Image uploaded successfully");
+    res.status(200).json({ message: "image uploaded" });
   } catch (error) {
-    console.error("Error creating challenge:", error);
-    res.status(500).json({ error: "Failed to create challenge" });
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Failed to upload image" });
   }
 });
+
+// app.post("/challenge", async (req, res) => {
+//   try {
+//     const { storyId, challengeCreatorId, chosenWords } = req.body;
+
+//     if (!storyId || !challengeCreatorId || !chosenWords) {
+//       throw new Error("Missing required fields");
+//     }
+
+//     if (
+//       Object.keys(chosenWords).length !== 4 ||
+//       !chosenWords.firstWord ||
+//       !chosenWords.secondWord ||
+//       !chosenWords.thirdWord ||
+//       !chosenWords.fourthWord ||
+//       !chosenWords.firstWord.word ||
+//       !chosenWords.secondWord.word ||
+//       !chosenWords.thirdWord.word ||
+//       !chosenWords.fourthWord.word ||
+//       !chosenWords.firstWord.imageName ||
+//       !chosenWords.secondWord.imageName ||
+//       !chosenWords.thirdWord.imageName ||
+//       !chosenWords.fourthWord.imageName
+//     ) {
+//       throw new Error("Invalid chosenWords structure");
+//     }
+
+//     const newChallenge = new Challenge({
+//       storyId,
+//       challengeCreatorId,
+//       chosenWords: {
+//         firstWord: {
+//           word: chosenWords.firstWord.word,
+//           description: chosenWords.firstWord.description,
+//           imageName: chosenWords.firstWord.imageName,
+//         },
+//         secondWord: {
+//           word: chosenWords.secondWord.word,
+//           description: chosenWords.secondWord.description,
+//           imageName: chosenWords.secondWord.imageName,
+//         },
+//         thirdWord: {
+//           word: chosenWords.thirdWord.word,
+//           description: chosenWords.thirdWord.description,
+//           imageName: chosenWords.thirdWord.imageName,
+//         },
+//         fourthWord: {
+//           word: chosenWords.fourthWord.word,
+//           description: chosenWords.fourthWord.description,
+//           imageName: chosenWords.fourthWord.imageName,
+//         },
+//       },
+//     });
+
+//     const savedChallenge = await newChallenge.save();
+
+//     console.log("New challenge created:", savedChallenge);
+//     res.status(201).json({
+//       message: "Challenge created successfully",
+//       newChallenge: savedChallenge,
+//     });
+//   } catch (error) {
+//     console.error("Error creating challenge:", error);
+//     res.status(500).json({ error: "Failed to create challenge" });
+//   }
+// });
 
 // app.post("/upload", upload.single("image"), (req, res) => {
 //   try {
@@ -264,21 +274,22 @@ app.get("/challenge/:id", async (req, res) => {
   }
 
   try {
-    const challengeData = await ChallengeModel.findById(challengeId).select("-_id");
+    const challengeData = await Challenge.findById(challengeId).select("-_id");
 
     if (!challengeData) {
       return res.status(404).json({ error: "Challenge not found" });
     }
 
-    const storyData = await Story.findById(challengeData.storyId).select("-_id");
+    const storyData = await Story.findById(challengeData.storyId).select(
+      "-_id"
+    );
 
-    res.status(200).json({challengeData, storyData});
+    res.status(200).json({ challengeData, storyData });
   } catch (error) {
     console.error("Error fetching challenge data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 async function init() {
   await initConnection();

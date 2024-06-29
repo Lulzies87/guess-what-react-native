@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 import server from "../app/api-client";
 import { router } from "expo-router";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
@@ -12,7 +13,8 @@ export default function LoginForm() {
   const handleSubmit = async () => {
     try {
       const res = await server.post("/login", { username, password });
-      const userData = res.data; // TODO: Decide how to handle player data
+      const token = res.data;
+      await SecureStore.setItemAsync("userToken", token);
       router.replace("/mainMenuPage");
     } catch (error) {
       if (axios.isAxiosError(error)) {

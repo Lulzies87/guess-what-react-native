@@ -12,6 +12,7 @@ import {
 import server from "../api-client";
 import { Challenge, Word } from "@/models/Challenge.model";
 import { Story } from "@/api/src/stories.model";
+import ChallengeSummary from "@/components/ChallengeSummary";
 
 export default function TakeChallenge() {
   const { id } = useLocalSearchParams();
@@ -22,6 +23,7 @@ export default function TakeChallenge() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [userInput, setUserInput] = useState<string | undefined>(undefined);
   const [guessedWords, setGuessedWords] = useState<string[]>([]);
+  const [isDone, setIsDone] = useState<boolean>(false);
 
   const currentWord = words[currentWordIndex];
 
@@ -54,6 +56,15 @@ export default function TakeChallenge() {
     }
   };
 
+  const handleSubmit = () => {
+    if (!userInput?.trim()) {
+      return;
+    }
+
+    setGuessedWords([...guessedWords, userInput.trim().toLowerCase()]);
+    setIsDone(true);
+  };
+
   useEffect(() => {
     if (typeof id === "string") {
       getChallengeData(id);
@@ -75,26 +86,17 @@ export default function TakeChallenge() {
       </View>
     );
   }
-  const handleSubmit = () => {
-    if (!userInput?.trim()) {
-      return;
-    }
 
-    setGuessedWords([...guessedWords, userInput.trim().toLowerCase()]);
-  };
-
-  if (guessedWords.length === words.length) {
+  if (isDone) {
     return (
-      <View>
-        <ThemedText type="title">Your story</ThemedText>
-        <ThemedText>{story?.plot}</ThemedText>
-        <ThemedText>{guessedWords[0]}</ThemedText>
-        <ThemedText>{guessedWords[1]}</ThemedText>
-        <ThemedText>{guessedWords[2]}</ThemedText>
-        <ThemedText>{guessedWords[3]}</ThemedText>
-      </View>
+      <ChallengeSummary
+        storyId={challenge.storyId}
+        guessedWords={guessedWords}
+        correctWords={words}
+      />
     );
   }
+
   return (
     <View style={styles.container}>
       <ThemedText style={styles.title} type="title">

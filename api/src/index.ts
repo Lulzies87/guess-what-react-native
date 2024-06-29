@@ -1,15 +1,18 @@
 import "dotenv/config";
-import express from "express";
+
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import bodyParser, { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
 import { Challenge } from "./challenges.model";
 import { Story } from "./stories.model";
+import { getUserDataById } from "./functions";
 
 const app = express();
 
@@ -38,9 +41,47 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.get("/check", (_, res) => {
-  res.json({ message: "Server is up and running" });
-});
+interface AuthRequest extends Request {
+  user?: { id: string; username: string };
+}
+
+const authenticationToken = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+app.get(
+  "/userData",
+  authenticationToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      if (!req.user || !req.user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const userData = await getUserDataById(req.user.id);
+
+      if (!userData) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.status(200).json(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -66,8 +107,13 @@ app.post("/login", async (req, res) => {
     }
 
     const { password: userPassword, ...user } = userData.toObject();
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
 
-    return res.status(200).json(user);
+    return res.status(200).json(token);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -93,84 +139,25 @@ app.post("/register", async (req, res) => {
       username,
       password: hashedPassword,
       timeRegistered: new Date(),
-      point: 0,
+      points: 0,
       friends: [],
       pendingChallenges: [],
     });
 
     await newPlayer.save();
-    res.status(201).json({ message: "Player registered!" });
+
+    const token = jwt.sign(
+      { id: newPlayer._id, username: newPlayer.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json(token);
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-// app.post("/challenge", upload.array("images", 4), async (req, res) => {
-//   try {
-//     const { storyId, challengeCreatorId, chosenWords } = req.body;
-
-//     if (!storyId || !challengeCreatorId || !chosenWords) {
-//       throw new Error("Missing required fields");
-//     }
-
-//     if (
-//       Object.keys(chosenWords).length !== 4 ||
-//       !chosenWords.firstWord ||
-//       !chosenWords.secondWord ||
-//       !chosenWords.thirdWord ||
-//       !chosenWords.fourthWord
-//     ) {
-//       throw new Error("Invalid chosenWords structure");
-//     }
-
-//     const images = req.files as Express.Multer.File[];
-//     if (images.length !== 4) {
-//       throw new Error("Exactly 4 images are required");
-//     }
-
-//     const mappedWords = [
-//       { word: chosenWords.firstWord, image: images[0]?.filename },
-//       { word: chosenWords.secondWord, image: images[1]?.filename },
-//       { word: chosenWords.thirdWord, image: images[2]?.filename },
-//       { word: chosenWords.fourthWord, image: images[3]?.filename },
-//     ];
-
-//     const newChallenge = new ChallengeModel({
-//       storyId,
-//       challengeCreatorId,
-//       chosenWords: {
-//         firstWord: {
-//           ...mappedWords[0].word,
-//           imageName: mappedWords[0].image,
-//         },
-//         secondWord: {
-//           ...mappedWords[1].word,
-//           imageName: mappedWords[1].image,
-//         },
-//         thirdWord: {
-//           ...mappedWords[2].word,
-//           imageName: mappedWords[2].image,
-//         },
-//         fourthWord: {
-//           ...mappedWords[3].word,
-//           imageName: mappedWords[3].image,
-//         },
-//       },
-//     });
-
-//     const savedChallenge = await newChallenge.save();
-
-//     console.log("New challenge created:", savedChallenge);
-//     res.status(201).json({
-//       message: "Challenge created successfully",
-//       newChallenge: savedChallenge,
-//     });
-//   } catch (error) {
-//     console.error("Error creating challenge:", error);
-//     res.status(500).json({ error: "Failed to create challenge" });
-//   }
-// });
 
 app.post("/upload", upload.array("images", 4), (req, res) => {
   try {
@@ -287,6 +274,23 @@ app.get("/challenge/:id", async (req, res) => {
     res.status(200).json({ challengeData, storyData });
   } catch (error) {
     console.error("Error fetching challenge data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/story/:id", async (req, res) => {
+  const storyId = req.params.id;
+
+  if (!storyId) {
+    res.status(400).json({ error: "Story ID is required" });
+  }
+
+  try {
+    const storyData = await Story.findById(storyId).select("-id");
+
+    res.status(200).json(storyData?.plot);
+  } catch (error) {
+    console.error("Error fetching story data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -1,15 +1,18 @@
 import "dotenv/config";
-import express from "express";
+
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import { json } from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
 import { Challenge } from "./challenges.model";
 import { Story } from "./stories.model";
+import { getUserDataById } from "./functions";
 
 const app = express();
 
@@ -33,6 +36,48 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
+interface AuthRequest extends Request {
+  user?: { id: string; username: string };
+}
+
+const authenticationToken = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+app.get(
+  "/userData",
+  authenticationToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      if (!req.user || !req.user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const userData = await getUserDataById(req.user.id);
+
+      if (!userData) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.status(200).json(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -58,8 +103,13 @@ app.post("/login", async (req, res) => {
     }
 
     const { password: userPassword, ...user } = userData.toObject();
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
 
-    return res.status(200).json(user);
+    return res.status(200).json(token);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -85,13 +135,20 @@ app.post("/register", async (req, res) => {
       username,
       password: hashedPassword,
       timeRegistered: new Date(),
-      point: 0,
+      points: 0,
       friends: [],
       pendingChallenges: [],
     });
 
     await newPlayer.save();
-    res.status(201).json({ message: "Player registered!" });
+
+    const token = jwt.sign(
+      { id: newPlayer._id, username: newPlayer.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json(token);
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal server error" });

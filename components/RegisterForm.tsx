@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import server from "../app/api-client";
@@ -40,12 +41,14 @@ export default function RegisterForm() {
     }
 
     try {
-      await server.post("/register", {
+      const res = await server.post("/register", {
         username,
         password,
       });
+
+      const token = res.data;
+      await SecureStore.setItemAsync("userToken", token);
       router.replace("/mainMenuPage");
-      console.log("Player registered!");
     } catch (error) {
       console.error(error);
     }

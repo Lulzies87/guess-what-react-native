@@ -45,10 +45,10 @@ export default function ChallengeButton({ userId }: ChallengeButtonProps) {
     }
   };
 
-  const handleFriendSelection = async (friendId: string) => {
+  const handleFriendSelection = async (friendId: string, friendName: string) => {
     const randomStory = await fetchRandomStory();
     if (randomStory) {
-      router.push(`/createChallengePage?id=${randomStory._id}&target=${friendId}&creator=${userId}`);
+      router.push(`/createChallengePage?id=${randomStory._id}&target=${friendId}&targetName=${friendName}&creator=${userId}`);
       setIsModalVisible(false);
     } else {
       console.error("Failed to fetch a random story");
@@ -71,7 +71,7 @@ export default function ChallengeButton({ userId }: ChallengeButtonProps) {
         {friendsList.map((friend) => (
           <TouchableOpacity
             key={friend.id}
-            onPress={() => handleFriendSelection(friend.id)}
+            onPress={() => handleFriendSelection(friend.id, friend.username)}
           >
             <ThemedText type="link">{friend.username}</ThemedText>
           </TouchableOpacity>

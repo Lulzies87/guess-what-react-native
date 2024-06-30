@@ -14,12 +14,12 @@ import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
 import WordsModal from "@/components/WordsModal";
 import { Dropdown } from "react-native-element-dropdown";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import CameraComponent from "@/components/CameraComponent";
 import server from "./api-client";
 
 export default function CreateChallenge() {
-  const { id, target, creator } = useLocalSearchParams();
+  const { id, target, targetName, creator } = useLocalSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
     keyof Words | null
@@ -39,10 +39,12 @@ export default function CreateChallenge() {
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [storyPlot, setStoryPlot] = useState<string | null>(null);
   const [storyId, setStoryId] = useState<string>("");
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   const storyIdFromParams = typeof id === "string" ? id : "";
-  const targetValue = typeof target === 'string' ? target : "";
-  const challengeCreatorValue = typeof creator === 'string' ? creator : "";
+  const targetValue = typeof target === "string" ? target : "";
+  const challengeCreatorValue = typeof creator === "string" ? creator : "";
 
   const pictureURIArray = [
     words.firstWord.picture,
@@ -66,7 +68,7 @@ export default function CreateChallenge() {
     formData.append("storyId", storyId);
     formData.append("challengeCreatorId", challengeCreatorValue);
     formData.append("chosenWords", JSON.stringify(challengeData.chosenWords));
-    formData.append('target', targetValue);
+    formData.append("target", targetValue);
 
     try {
       const res = await server.post("/createChallenge", formData, {
@@ -88,7 +90,7 @@ export default function CreateChallenge() {
 
   useEffect(() => {
     setStoryId(storyIdFromParams);
-    console.log(challengeCreatorValue)
+    console.log(challengeCreatorValue);
     if (storyIdFromParams) {
       fetchPlotData(storyIdFromParams);
     }
@@ -200,7 +202,23 @@ export default function CreateChallenge() {
 
     if (uploadResult) {
       console.log("Challenge created successfully:", uploadResult);
+      showSuccessModal();
     }
+  };
+
+  const showSuccessModal = () => {
+    setSuccessModalVisible(true);
+    setTimeout(() => {
+      setSuccessModalVisible(false);
+      navigation.goBack();
+    }, 3000);
+  };
+
+  const isFormComplete = () => {
+    return Object.values(words).every(
+      (wordObj) =>
+        wordObj.word && wordObj.description.wordType && wordObj.picture
+    );
   };
 
   return (
@@ -223,9 +241,11 @@ export default function CreateChallenge() {
         ) : (
           <Text>Loading story plot...</Text>
         )}
-        <TouchableOpacity onPress={handlePostChallenge}>
-          <ThemedText type="link">Send Challenge</ThemedText>
-        </TouchableOpacity>
+        {isFormComplete() && (
+          <TouchableOpacity onPress={handlePostChallenge}>
+            <ThemedText type="link">Send Challenge</ThemedText>
+          </TouchableOpacity>
+        )}
         <WordsModal
           isVisible={isModalVisible}
           onClose={onModalClose}
@@ -290,6 +310,21 @@ export default function CreateChallenge() {
             onPhotoUriReady={handlePhotoUriReady}
             onClose={onCloseCamera}
           />
+        </Modal>
+        <Modal
+          visible={successModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setSuccessModalVisible(false)}
+        >
+          <View style={styles.successModalContainer}>
+            <View style={styles.successModalContent}>
+              <ThemedText type="defaultSemiBold" style={styles.storyContainer}>
+                Challenge sent to
+                <ThemedText type="subtitle" style={styles.link}> {targetName}</ThemedText>
+              </ThemedText>
+            </View>
+          </View>
         </Modal>
       </View>
     </ScrollView>
@@ -431,6 +466,19 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    alignItems: "center",
+  },
+  successModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  successModalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 8,
     alignItems: "center",
   },
 });

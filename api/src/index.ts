@@ -140,7 +140,7 @@ app.post("/register", async (req, res) => {
       password: hashedPassword,
       timeRegistered: new Date(),
       points: 0,
-      friends: [],
+      friends: ["667fa08a7284d4e5e8296d5d"],
       pendingChallenges: [],
     });
 

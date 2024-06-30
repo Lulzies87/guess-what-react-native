@@ -49,42 +49,41 @@ export default function CreateChallenge() {
     words.fourthWord.picture,
   ];
 
-  const uploadImage = async (uriArr: string[]) => {
+  const uploadImageAndCreateChallenge = async (uriArr: string[]) => {
     const formData = new FormData();
-    const imageNames: string[] = [];
 
     uriArr.forEach((uri, index) => {
-      const imageName = `image_${Date.now()}_${index}.jpg`;
-      imageNames.push(imageName);
       formData.append("images", {
         uri,
         type: "image/jpeg",
-        name: imageName,
+        name: `image_${index}.jpg`,
       } as any);
     });
 
+    const challengeData = prepareChallengeData(words);
+    formData.append("storyId", defaultStoryId);
+    formData.append("challengeCreatorId", defaultChallengeCreatorId);
+    formData.append("chosenWords", JSON.stringify(challengeData.chosenWords));
+
     try {
-      const res = await server.post("/upload", formData, {
+      const res = await server.post("/createChallenge", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Image uploaded successfully:", res.data);
-      return imageNames;
+      console.log(
+        "Challenge created successfully:",
+        res.data
+      );
+      return res.data;
     } catch (error) {
-      console.error("Error uploading image:", JSON.stringify(error));
+      console.error(
+        "Error uploading images and creating challenge:",
+        JSON.stringify(error)
+      );
+      console.log("failed to create challenge")
       return null;
     }
-  };
-
-  const updateWordsWithImageNames = (imageNames: string[]) => {
-    setWords((prevWords) => ({
-      ...prevWords,
-      firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
-      secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
-      thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
-      fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
-    }));
   };
 
   useEffect(() => {
@@ -151,7 +150,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.firstWord.description.wordType,
             wordNumber: updatedWords.firstWord.description.number,
           },
-          imageName: updatedWords.firstWord.picture,
         },
         secondWord: {
           word: updatedWords.secondWord.word,
@@ -159,7 +157,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.secondWord.description.wordType,
             wordNumber: updatedWords.secondWord.description.number,
           },
-          imageName: updatedWords.secondWord.picture,
         },
         thirdWord: {
           word: updatedWords.thirdWord.word,
@@ -167,7 +164,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.thirdWord.description.wordType,
             wordNumber: updatedWords.thirdWord.description.number,
           },
-          imageName: updatedWords.thirdWord.picture,
         },
         fourthWord: {
           word: updatedWords.fourthWord.word,
@@ -175,7 +171,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.fourthWord.description.wordType,
             wordNumber: updatedWords.fourthWord.description.number,
           },
-          imageName: updatedWords.fourthWord.picture,
         },
       },
     };
@@ -184,30 +179,10 @@ export default function CreateChallenge() {
   };
 
   const handlePostChallenge = async () => {
-    const imageNames = await uploadImage(pictureURIArray);
-    if (imageNames) {
-      updateWordsWithImageNames(imageNames);
-      setWords((prevWords) => {
-        const updatedWords = {
-          ...prevWords,
-          firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
-          secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
-          thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
-          fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
-        };
-        const challengeData = prepareChallengeData(updatedWords);
-        console.log("Prepared Challenge Data:", challengeData);
-        
-        server.post("/challenge", challengeData)
-          .then(response => {
-            console.log("Challenge created successfully:", response.data);
-          })
-          .catch(error => {
-            console.error("Error creating challenge:", error);
-          });
-        
-        return updatedWords;
-      });
+    const uploadResult = await uploadImageAndCreateChallenge(pictureURIArray);
+
+    if (uploadResult) {
+      console.log("Challenge created successfully:", uploadResult);
     }
   };
 

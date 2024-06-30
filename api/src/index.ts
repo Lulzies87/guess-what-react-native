@@ -7,7 +7,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import jwt from "jsonwebtoken";
-import bodyParser, { json } from "body-parser";
+import bodyParser from "body-parser";
 import { initConnection } from "./dbConnection";
 import { Player } from "./players.model";
 import { Challenge } from "./challenges.model";
@@ -18,24 +18,18 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use(json());
+app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "public", "images")));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, "public", "images");
-
     fs.mkdirSync(uploadDir, { recursive: true });
-
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-    );
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
   },
 });
 
@@ -159,38 +153,37 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/upload", upload.array("images", 4), (req, res) => {
+app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
   try {
-    console.log("Image uploaded successfully");
-    res.status(200).json({ message: "image uploaded" });
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    res.status(500).json({ error: "Failed to upload image" });
-  }
-});
+    if (!req.files) {
+      throw new Error("Files upload failed");
+    }
 
-app.post("/challenge", async (req, res) => {
-  try {
+    const files = (req as any).files;
+    const imageNames = files.map((file: Express.Multer.File) => file.filename);
+
     const { storyId, challengeCreatorId, chosenWords } = req.body;
 
     if (!storyId || !challengeCreatorId || !chosenWords) {
       throw new Error("Missing required fields");
     }
 
+    const parsedChosenWords = JSON.parse(chosenWords);
+
     if (
-      Object.keys(chosenWords).length !== 4 ||
-      !chosenWords.firstWord ||
-      !chosenWords.secondWord ||
-      !chosenWords.thirdWord ||
-      !chosenWords.fourthWord ||
-      !chosenWords.firstWord.word ||
-      !chosenWords.secondWord.word ||
-      !chosenWords.thirdWord.word ||
-      !chosenWords.fourthWord.word ||
-      !chosenWords.firstWord.imageName ||
-      !chosenWords.secondWord.imageName ||
-      !chosenWords.thirdWord.imageName ||
-      !chosenWords.fourthWord.imageName
+      Object.keys(parsedChosenWords).length !== 4 ||
+      !parsedChosenWords.firstWord ||
+      !parsedChosenWords.secondWord ||
+      !parsedChosenWords.thirdWord ||
+      !parsedChosenWords.fourthWord ||
+      !parsedChosenWords.firstWord.word ||
+      !parsedChosenWords.secondWord.word ||
+      !parsedChosenWords.thirdWord.word ||
+      !parsedChosenWords.fourthWord.word ||
+      !parsedChosenWords.firstWord.description ||
+      !parsedChosenWords.secondWord.description ||
+      !parsedChosenWords.thirdWord.description ||
+      !parsedChosenWords.fourthWord.description
     ) {
       throw new Error("Invalid chosenWords structure");
     }
@@ -200,24 +193,24 @@ app.post("/challenge", async (req, res) => {
       challengeCreatorId,
       chosenWords: {
         firstWord: {
-          word: chosenWords.firstWord.word,
-          description: chosenWords.firstWord.description,
-          imageName: chosenWords.firstWord.imageName,
+          word: parsedChosenWords.firstWord.word,
+          description: parsedChosenWords.firstWord.description,
+          imageName: imageNames[0],
         },
         secondWord: {
-          word: chosenWords.secondWord.word,
-          description: chosenWords.secondWord.description,
-          imageName: chosenWords.secondWord.imageName,
+          word: parsedChosenWords.secondWord.word,
+          description: parsedChosenWords.secondWord.description,
+          imageName: imageNames[1],
         },
         thirdWord: {
-          word: chosenWords.thirdWord.word,
-          description: chosenWords.thirdWord.description,
-          imageName: chosenWords.thirdWord.imageName,
+          word: parsedChosenWords.thirdWord.word,
+          description: parsedChosenWords.thirdWord.description,
+          imageName: imageNames[2],
         },
         fourthWord: {
-          word: chosenWords.fourthWord.word,
-          description: chosenWords.fourthWord.description,
-          imageName: chosenWords.fourthWord.imageName,
+          word: parsedChosenWords.fourthWord.word,
+          description: parsedChosenWords.fourthWord.description,
+          imageName: imageNames[3],
         },
       },
     });
@@ -230,26 +223,8 @@ app.post("/challenge", async (req, res) => {
       newChallenge: savedChallenge,
     });
   } catch (error) {
-    console.error("Error creating challenge:", error);
-    res.status(500).json({ error: "Failed to create challenge" });
-  }
-});
-
-app.post("/upload", upload.single("image"), (req, res) => {
-  try {
-    if (!req.file) {
-      throw new Error("File upload failed");
-    }
-    console.log("Image uploaded!", req.file);
-    res.status(200).json({ fileName: req.file!.filename });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error uploading image:", error.message);
-      res.status(500).json({ error: "Failed to upload image" });
-    } else {
-      console.error("Unexpected error:", error);
-      res.status(500).json({ error: "Unexpected error occurred" });
-    }
+    console.error("Error creating challenge and uploading images:", error);
+    res.status(500).json({ error: error || "Failed to upload images and create challenge" });
   }
 });
 
@@ -297,7 +272,6 @@ app.get("/story/:id", async (req, res) => {
 
 async function init() {
   await initConnection();
-
   const PORT = process.env.PORT ?? 3000;
   app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 }

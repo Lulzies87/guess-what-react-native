@@ -18,13 +18,8 @@ import { Link, useLocalSearchParams } from "expo-router";
 import CameraComponent from "@/components/CameraComponent";
 import server from "./api-client";
 
-
-const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
-
 export default function CreateChallenge() {
-  const { id, plot } = useLocalSearchParams();
-  const storyId = typeof id === 'string' ? id : '';
-  const storyPlot = typeof plot === 'string' ? decodeURIComponent(plot) : '';
+  const { id, target, creator } = useLocalSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
     keyof Words | null
@@ -42,6 +37,12 @@ export default function CreateChallenge() {
     useState<ValueOfKey<WordDescription, "number">>(undefined);
   const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [storyPlot, setStoryPlot] = useState<string | null>(null);
+  const [storyId, setStoryId] = useState<string>("");
+
+  const storyIdFromParams = typeof id === "string" ? id : "";
+  const targetValue = typeof target === 'string' ? target : "";
+  const challengeCreatorValue = typeof creator === 'string' ? creator : "";
 
   const pictureURIArray = [
     words.firstWord.picture,
@@ -63,8 +64,9 @@ export default function CreateChallenge() {
 
     const challengeData = prepareChallengeData(words);
     formData.append("storyId", storyId);
-    formData.append("challengeCreatorId", defaultChallengeCreatorId);
+    formData.append("challengeCreatorId", challengeCreatorValue);
     formData.append("chosenWords", JSON.stringify(challengeData.chosenWords));
+    formData.append('target', targetValue);
 
     try {
       const res = await server.post("/createChallenge", formData, {
@@ -72,24 +74,38 @@ export default function CreateChallenge() {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(
-        "Challenge created successfully:",
-        res.data
-      );
+      console.log("Challenge created successfully:", res.data);
       return res.data;
     } catch (error) {
       console.error(
         "Error uploading images and creating challenge:",
         JSON.stringify(error)
       );
-      console.log("failed to create challenge")
+      console.log("failed to create challenge");
       return null;
     }
   };
 
   useEffect(() => {
-    console.log("storyId", id, "plot", plot);
-  }, [pictureURIArray]);
+    setStoryId(storyIdFromParams);
+    console.log(challengeCreatorValue)
+    if (storyIdFromParams) {
+      fetchPlotData(storyIdFromParams);
+    }
+  }, [storyIdFromParams]);
+
+  const fetchPlotData = async (id: string) => {
+    try {
+      const response = await server.get(`/story/${id}`);
+      if (response.status === 200) {
+        setStoryPlot(response.data);
+      } else {
+        console.error("Failed to fetch plot data:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching plot data:", error);
+    }
+  };
 
   const onModalClose = () => {
     useExitModal(
@@ -143,7 +159,7 @@ export default function CreateChallenge() {
   const prepareChallengeData = (updatedWords: Words) => {
     const data = {
       storyId: id,
-      challengeCreatorId: defaultChallengeCreatorId,
+      challengeCreatorId: challengeCreatorValue,
       chosenWords: {
         firstWord: {
           word: updatedWords.firstWord.word,
@@ -195,16 +211,20 @@ export default function CreateChallenge() {
             <ThemedText type="link">Home</ThemedText>
           </TouchableOpacity>
         </Link>
-        <Story
-          storyId={storyId}
-          plot={decodeURIComponent(storyPlot)}
-          setIsModalVisible={setIsModalVisible}
-          setSelectedKeywordIndex={setSelectedKeywordIndex}
-          setCurrentWord={setCurrentWord}
-          words={words}
-        />
+        {storyPlot ? (
+          <Story
+            storyId={storyId}
+            plot={storyPlot}
+            setIsModalVisible={setIsModalVisible}
+            setSelectedKeywordIndex={setSelectedKeywordIndex}
+            setCurrentWord={setCurrentWord}
+            words={words}
+          />
+        ) : (
+          <Text>Loading story plot...</Text>
+        )}
         <TouchableOpacity onPress={handlePostChallenge}>
-        <ThemedText type="link">Send Challenge</ThemedText>
+          <ThemedText type="link">Send Challenge</ThemedText>
         </TouchableOpacity>
         <WordsModal
           isVisible={isModalVisible}

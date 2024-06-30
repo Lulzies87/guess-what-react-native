@@ -1,10 +1,35 @@
-import React from "react";
-import { Pressable, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Pressable, View, Text, TouchableOpacity } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useRouter } from "expo-router";
+import server from "../app/api-client";
+import CustomModal from "./CustomModal";
 
-export default function ChallengeButton() {
+interface ChallengeButtonProps {
+  userId: string;
+}
+
+export default function ChallengeButton({ userId }: ChallengeButtonProps) {
   const router = useRouter();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [friendsList, setFriendsList] = useState<{ id: string; username: string }[]>([]);
+
+  useEffect(() => {
+    const fetchFriendsList = async () => {
+      try {
+        const response = await server.get('/getFriendsList', { params: { userId } });
+        if (response.status === 200) {
+          setFriendsList(response.data);
+        } else {
+          console.error("Failed to fetch friends list:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching friends list:", error);
+      }
+    };
+
+    fetchFriendsList();
+  }, [userId]);
 
   const fetchRandomStory = async () => {
     try {
@@ -20,20 +45,38 @@ export default function ChallengeButton() {
     }
   };
 
-  const handlePress = async () => {
+  const handleFriendSelection = async (friendId: string) => {
     const randomStory = await fetchRandomStory();
     if (randomStory) {
-      router.navigate(`/createChallengePage?id=${randomStory._id}&plot=${encodeURIComponent(randomStory.plot)}`); 
+      router.push(`/createChallengePage?id=${randomStory._id}&target=${friendId}&creator=${userId}`);
+      setIsModalVisible(false);
     } else {
       console.error("Failed to fetch a random story");
     }
   };
 
   return (
-    <Pressable onPress={handlePress}>
-      <ThemedText type="link">
-        Create a Challenge
-      </ThemedText>
-    </Pressable>
+    <>
+      <Pressable onPress={() => setIsModalVisible(true)}>
+        <ThemedText type="link">
+          Create a Challenge
+        </ThemedText>
+      </Pressable>
+
+      <CustomModal
+        title="Select a Friend"
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      >
+        {friendsList.map((friend) => (
+          <TouchableOpacity
+            key={friend.id}
+            onPress={() => handleFriendSelection(friend.id)}
+          >
+            <ThemedText type="link">{friend.username}</ThemedText>
+          </TouchableOpacity>
+        ))}
+      </CustomModal>
+    </>
   );
 }

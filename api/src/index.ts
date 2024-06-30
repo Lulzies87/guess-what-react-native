@@ -162,9 +162,9 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
     const files = (req as any).files;
     const imageNames = files.map((file: Express.Multer.File) => file.filename);
 
-    const { storyId, challengeCreatorId, chosenWords } = req.body;
+    const { storyId, challengeCreatorId, chosenWords, target } = req.body;
 
-    if (!storyId || !challengeCreatorId || !chosenWords) {
+    if (!storyId || !challengeCreatorId || !chosenWords || !target) {
       throw new Error("Missing required fields");
     }
 
@@ -216,6 +216,10 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
     });
 
     const savedChallenge = await newChallenge.save();
+
+    await Player.findByIdAndUpdate(target, {
+      $push: { pendingChallenges: savedChallenge._id }
+    });
 
     console.log("New challenge created:", savedChallenge);
     res.status(201).json({
@@ -302,7 +306,7 @@ app.get("/story/:id", async (req, res) => {
   }
 });
 
-app.get('/randomStory', async (req, res) => {
+app.get("/randomStory", async (req, res) => {
   try {
     const count = await Story.countDocuments();
     if (count === 0) {
@@ -319,6 +323,27 @@ app.get('/randomStory', async (req, res) => {
     res.json(randomStory);
   } catch (error) {
     console.error('Error fetching random story:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/getFriendsList', async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+    const user = await Player.findById(userId).select('friends');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const friends = await Player.find({ _id: { $in: user.friends } }).select('username');
+    res.status(200).json(friends.map(friend => ({ id: friend._id, username: friend.username })));
+  } catch (error) {
+    console.error("Error fetching friends list:", error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

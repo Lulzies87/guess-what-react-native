@@ -3,7 +3,6 @@ import CustomModal from "@/components/CustomModal";
 import { ThemedText } from "@/components/ThemedText";
 import { fetchUserData, logout } from "@/functions/functions";
 import { User } from "@/models/User.model";
-import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
@@ -49,7 +48,7 @@ export default function MainMenu() {
       </View>
 
       <View style={styles.buttonsContainer}>
-        <CreateChallengeButton />
+        {userData ? <CreateChallengeButton userId={userData._id} /> : ""}
         <Pressable>
           <ThemedText
             type="link"

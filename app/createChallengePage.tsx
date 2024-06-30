@@ -13,16 +13,18 @@ import { ThemedText } from "@/components/ThemedText";
 import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
 import WordsModal from "@/components/WordsModal";
-import { stories } from "@/stories/stories";
 import { Dropdown } from "react-native-element-dropdown";
 import { Link, useLocalSearchParams } from "expo-router";
 import CameraComponent from "@/components/CameraComponent";
 import server from "./api-client";
 
-const defaultStoryId = "6677bdc332cb84d89877964e";
+
 const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
 
 export default function CreateChallenge() {
+  const { id, plot } = useLocalSearchParams();
+  const storyId = typeof id === 'string' ? id : '';
+  const storyPlot = typeof plot === 'string' ? decodeURIComponent(plot) : '';
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
     keyof Words | null
@@ -34,7 +36,6 @@ export default function CreateChallenge() {
     fourthWord: { word: "", description: { wordType: "verb" }, picture: "" },
   });
   const [currentWord, setCurrentWord] = useState("");
-  const params = useLocalSearchParams();
   const [selectedWordType, setSelectedWordType] =
     useState<ValueOfKey<WordDescription, "wordType">>("verb");
   const [selectedWordNumber, setSelectedWordNumber] =
@@ -61,7 +62,7 @@ export default function CreateChallenge() {
     });
 
     const challengeData = prepareChallengeData(words);
-    formData.append("storyId", defaultStoryId);
+    formData.append("storyId", storyId);
     formData.append("challengeCreatorId", defaultChallengeCreatorId);
     formData.append("chosenWords", JSON.stringify(challengeData.chosenWords));
 
@@ -87,7 +88,7 @@ export default function CreateChallenge() {
   };
 
   useEffect(() => {
-    console.log("Updated pictures state:", pictureURIArray);
+    console.log("storyId", id, "plot", plot);
   }, [pictureURIArray]);
 
   const onModalClose = () => {
@@ -141,7 +142,7 @@ export default function CreateChallenge() {
 
   const prepareChallengeData = (updatedWords: Words) => {
     const data = {
-      storyId: defaultStoryId,
+      storyId: id,
       challengeCreatorId: defaultChallengeCreatorId,
       chosenWords: {
         firstWord: {
@@ -195,7 +196,8 @@ export default function CreateChallenge() {
           </TouchableOpacity>
         </Link>
         <Story
-          randomStoryNumber={Number(params.id)}
+          storyId={storyId}
+          plot={decodeURIComponent(storyPlot)}
           setIsModalVisible={setIsModalVisible}
           setSelectedKeywordIndex={setSelectedKeywordIndex}
           setCurrentWord={setCurrentWord}
@@ -275,7 +277,8 @@ export default function CreateChallenge() {
 }
 
 type StoryProps = {
-  randomStoryNumber: number;
+  storyId: string;
+  plot: string;
   setIsModalVisible: (visible: boolean) => void;
   setSelectedKeywordIndex: (index: keyof Words | null) => void;
   setCurrentWord: (word: string) => void;
@@ -303,13 +306,13 @@ function useExitModal(
 }
 
 function Story({
-  randomStoryNumber,
+  storyId,
+  plot,
   setIsModalVisible,
   setSelectedKeywordIndex,
   setCurrentWord,
   words,
 }: StoryProps) {
-  const plot = stories[randomStoryNumber].plot;
   const content = replacePlaceholdersWithLinks(
     plot,
     setIsModalVisible,

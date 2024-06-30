@@ -1,3 +1,4 @@
+import CreateChallengeButton from "@/components/CreateChallengeButton";
 import CustomModal from "@/components/CustomModal";
 import { ThemedText } from "@/components/ThemedText";
 import { fetchUserData, logout } from "@/functions/functions";
@@ -48,19 +49,7 @@ export default function MainMenu() {
       </View>
 
       <View style={styles.buttonsContainer}>
-        <Pressable>
-          <ThemedText
-            type="link"
-            onPress={() => {
-              router.navigate(
-                `/createChallengePage?id=${getRandomStoryNumber(stories)}`
-              );
-            }}
-          >
-            Create a Challenge
-          </ThemedText>
-        </Pressable>
-
+        <CreateChallengeButton />
         <Pressable>
           <ThemedText
             type="link"
@@ -152,7 +141,7 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: "20%"
+    paddingVertical: "20%",
   },
   titleContainer: {
     width: "100%",

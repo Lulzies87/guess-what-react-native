@@ -302,6 +302,27 @@ app.get("/story/:id", async (req, res) => {
   }
 });
 
+app.get('/randomStory', async (req, res) => {
+  try {
+    const count = await Story.countDocuments();
+    if (count === 0) {
+      return res.status(404).json({ error: 'No stories found' });
+    }
+
+    const random = Math.floor(Math.random() * count);
+    const randomStory = await Story.findOne().skip(random);
+
+    if (!randomStory) {
+      return res.status(404).json({ error: 'Random story not found' });
+    }
+
+    res.json(randomStory);
+  } catch (error) {
+    console.error('Error fetching random story:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.patch("/score", async (req, res) => {
   const { userId, pointsToAdd } = req.body;
 

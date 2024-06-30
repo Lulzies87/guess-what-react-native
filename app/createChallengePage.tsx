@@ -1,3 +1,14 @@
+import React, { useState, useEffect, SetStateAction } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Pressable,
+  TextInput,
+  Modal,
+} from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -5,18 +16,11 @@ import WordsModal from "@/components/WordsModal";
 import { stories } from "@/stories/stories";
 import { Dropdown } from "react-native-element-dropdown";
 import { Link, useLocalSearchParams } from "expo-router";
-import { SetStateAction, useEffect, useState } from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-  Pressable,
-  TextInput,
-  ScrollView,
-  Modal,
-} from "react-native";
 import CameraComponent from "@/components/CameraComponent";
+import server from "./api-client";
+
+const defaultStoryId = "6677bdc332cb84d89877964e";
+const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
 
 export default function CreateChallenge() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,9 +42,54 @@ export default function CreateChallenge() {
   const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
+  const pictureURIArray = [
+    words.firstWord.picture,
+    words.secondWord.picture,
+    words.thirdWord.picture,
+    words.fourthWord.picture,
+  ];
+
+  const uploadImage = async (uriArr: string[]) => {
+    const formData = new FormData();
+    const imageNames: string[] = [];
+
+    uriArr.forEach((uri, index) => {
+      const imageName = `image_${Date.now()}_${index}.jpg`;
+      imageNames.push(imageName);
+      formData.append("images", {
+        uri,
+        type: "image/jpeg",
+        name: imageName,
+      } as any);
+    });
+
+    try {
+      const res = await server.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Image uploaded successfully:", res.data);
+      return imageNames;
+    } catch (error) {
+      console.error("Error uploading image:", JSON.stringify(error));
+      return null;
+    }
+  };
+
+  const updateWordsWithImageNames = (imageNames: string[]) => {
+    setWords((prevWords) => ({
+      ...prevWords,
+      firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
+      secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
+      thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
+      fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
+    }));
+  };
+
   useEffect(() => {
-    console.log("Updated words state:", words);
-  }, [words]);
+    console.log("Updated pictures state:", pictureURIArray);
+  }, [pictureURIArray]);
 
   const onModalClose = () => {
     useExitModal(
@@ -59,7 +108,7 @@ export default function CreateChallenge() {
         ...words,
         [selectedKeywordIndex]: {
           ...words[selectedKeywordIndex],
-          word: currentWord,
+          word: currentWord.trim().toLowerCase(),
           description: {
             ...words[selectedKeywordIndex].description,
             wordType: selectedWordType,
@@ -91,6 +140,77 @@ export default function CreateChallenge() {
     setCurrentPhotoURI(null);
   };
 
+  const prepareChallengeData = (updatedWords: Words) => {
+    const data = {
+      storyId: defaultStoryId,
+      challengeCreatorId: defaultChallengeCreatorId,
+      chosenWords: {
+        firstWord: {
+          word: updatedWords.firstWord.word,
+          description: {
+            wordType: updatedWords.firstWord.description.wordType,
+            wordNumber: updatedWords.firstWord.description.number,
+          },
+          imageName: updatedWords.firstWord.picture,
+        },
+        secondWord: {
+          word: updatedWords.secondWord.word,
+          description: {
+            wordType: updatedWords.secondWord.description.wordType,
+            wordNumber: updatedWords.secondWord.description.number,
+          },
+          imageName: updatedWords.secondWord.picture,
+        },
+        thirdWord: {
+          word: updatedWords.thirdWord.word,
+          description: {
+            wordType: updatedWords.thirdWord.description.wordType,
+            wordNumber: updatedWords.thirdWord.description.number,
+          },
+          imageName: updatedWords.thirdWord.picture,
+        },
+        fourthWord: {
+          word: updatedWords.fourthWord.word,
+          description: {
+            wordType: updatedWords.fourthWord.description.wordType,
+            wordNumber: updatedWords.fourthWord.description.number,
+          },
+          imageName: updatedWords.fourthWord.picture,
+        },
+      },
+    };
+
+    return data;
+  };
+
+  const handlePostChallenge = async () => {
+    const imageNames = await uploadImage(pictureURIArray);
+    if (imageNames) {
+      updateWordsWithImageNames(imageNames);
+      setWords((prevWords) => {
+        const updatedWords = {
+          ...prevWords,
+          firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
+          secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
+          thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
+          fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
+        };
+        const challengeData = prepareChallengeData(updatedWords);
+        console.log("Prepared Challenge Data:", challengeData);
+        
+        server.post("/challenge", challengeData)
+          .then(response => {
+            console.log("Challenge created successfully:", response.data);
+          })
+          .catch(error => {
+            console.error("Error creating challenge:", error);
+          });
+        
+        return updatedWords;
+      });
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -109,6 +229,9 @@ export default function CreateChallenge() {
           setCurrentWord={setCurrentWord}
           words={words}
         />
+        <TouchableOpacity onPress={handlePostChallenge}>
+          <Text>Send Challenge</Text>
+        </TouchableOpacity>
         <WordsModal
           isVisible={isModalVisible}
           onClose={onModalClose}

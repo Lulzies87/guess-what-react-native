@@ -3,23 +3,25 @@ import { View, StyleSheet, Modal, Pressable } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
 
-type SettingsModalProps = {
+type CustomModalProps = {
+  title: string;
   isVisible: boolean;
   children: ReactNode;
   onClose: () => void;
 };
 
-export default function SettingsModal({
+export default function CustomModal({
+  title,
   isVisible,
   children,
   onClose,
-}: SettingsModalProps) {
+}: CustomModalProps) {
   return (
     <Modal animationType="fade" transparent={true} visible={isVisible}>
       <View style={styles.overlay}>
         <View style={styles.contnainer}>
           <View style={styles.titleContainer}>
-            <ThemedText type="subtitle">Settings</ThemedText>
+            <ThemedText type="subtitle">{title}</ThemedText>
             <Pressable onPress={onClose}>
               <MaterialIcons name="close" color="black" size={22} />
             </Pressable>

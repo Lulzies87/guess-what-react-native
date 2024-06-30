@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import { challengeSchema } from "./challenges.model";
 
 type Player = {
   username: string;

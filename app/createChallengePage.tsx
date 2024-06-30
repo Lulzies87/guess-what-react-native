@@ -13,16 +13,13 @@ import { ThemedText } from "@/components/ThemedText";
 import { ValueOfKey, WordDescription, Words } from "@/components/Words";
 import { MaterialIcons } from "@expo/vector-icons";
 import WordsModal from "@/components/WordsModal";
-import { stories } from "@/stories/stories";
 import { Dropdown } from "react-native-element-dropdown";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import CameraComponent from "@/components/CameraComponent";
 import server from "./api-client";
 
-const defaultStoryId = "6677bdc332cb84d89877964e";
-const defaultChallengeCreatorId = "667e5415ec930a70467b003d";
-
 export default function CreateChallenge() {
+  const { id, target, targetName, creator } = useLocalSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKeywordIndex, setSelectedKeywordIndex] = useState<
     keyof Words | null
@@ -34,13 +31,20 @@ export default function CreateChallenge() {
     fourthWord: { word: "", description: { wordType: "verb" }, picture: "" },
   });
   const [currentWord, setCurrentWord] = useState("");
-  const params = useLocalSearchParams();
   const [selectedWordType, setSelectedWordType] =
     useState<ValueOfKey<WordDescription, "wordType">>("verb");
   const [selectedWordNumber, setSelectedWordNumber] =
     useState<ValueOfKey<WordDescription, "number">>(undefined);
   const [currentPhotoURI, setCurrentPhotoURI] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [storyPlot, setStoryPlot] = useState<string | null>(null);
+  const [storyId, setStoryId] = useState<string>("");
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const navigation = useNavigation();
+
+  const storyIdFromParams = typeof id === "string" ? id : "";
+  const targetValue = typeof target === "string" ? target : "";
+  const challengeCreatorValue = typeof creator === "string" ? creator : "";
 
   const pictureURIArray = [
     words.firstWord.picture,
@@ -49,47 +53,61 @@ export default function CreateChallenge() {
     words.fourthWord.picture,
   ];
 
-  const uploadImage = async (uriArr: string[]) => {
+  const uploadImageAndCreateChallenge = async (uriArr: string[]) => {
     const formData = new FormData();
-    const imageNames: string[] = [];
 
     uriArr.forEach((uri, index) => {
-      const imageName = `image_${Date.now()}_${index}.jpg`;
-      imageNames.push(imageName);
       formData.append("images", {
         uri,
         type: "image/jpeg",
-        name: imageName,
+        name: `image_${index}.jpg`,
       } as any);
     });
 
+    const challengeData = prepareChallengeData(words);
+    formData.append("storyId", storyId);
+    formData.append("challengeCreatorId", challengeCreatorValue);
+    formData.append("chosenWords", JSON.stringify(challengeData.chosenWords));
+    formData.append("target", targetValue);
+
     try {
-      const res = await server.post("/upload", formData, {
+      const res = await server.post("/createChallenge", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Image uploaded successfully:", res.data);
-      return imageNames;
+      console.log("Challenge created successfully:", res.data);
+      return res.data;
     } catch (error) {
-      console.error("Error uploading image:", JSON.stringify(error));
+      console.error(
+        "Error uploading images and creating challenge:",
+        JSON.stringify(error)
+      );
+      console.log("failed to create challenge");
       return null;
     }
   };
 
-  const updateWordsWithImageNames = (imageNames: string[]) => {
-    setWords((prevWords) => ({
-      ...prevWords,
-      firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
-      secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
-      thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
-      fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
-    }));
-  };
-
   useEffect(() => {
-    console.log("Updated pictures state:", pictureURIArray);
-  }, [pictureURIArray]);
+    setStoryId(storyIdFromParams);
+    console.log(challengeCreatorValue);
+    if (storyIdFromParams) {
+      fetchPlotData(storyIdFromParams);
+    }
+  }, [storyIdFromParams]);
+
+  const fetchPlotData = async (id: string) => {
+    try {
+      const response = await server.get(`/story/${id}`);
+      if (response.status === 200) {
+        setStoryPlot(response.data);
+      } else {
+        console.error("Failed to fetch plot data:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching plot data:", error);
+    }
+  };
 
   const onModalClose = () => {
     useExitModal(
@@ -142,8 +160,8 @@ export default function CreateChallenge() {
 
   const prepareChallengeData = (updatedWords: Words) => {
     const data = {
-      storyId: defaultStoryId,
-      challengeCreatorId: defaultChallengeCreatorId,
+      storyId: id,
+      challengeCreatorId: challengeCreatorValue,
       chosenWords: {
         firstWord: {
           word: updatedWords.firstWord.word,
@@ -151,7 +169,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.firstWord.description.wordType,
             wordNumber: updatedWords.firstWord.description.number,
           },
-          imageName: updatedWords.firstWord.picture,
         },
         secondWord: {
           word: updatedWords.secondWord.word,
@@ -159,7 +176,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.secondWord.description.wordType,
             wordNumber: updatedWords.secondWord.description.number,
           },
-          imageName: updatedWords.secondWord.picture,
         },
         thirdWord: {
           word: updatedWords.thirdWord.word,
@@ -167,7 +183,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.thirdWord.description.wordType,
             wordNumber: updatedWords.thirdWord.description.number,
           },
-          imageName: updatedWords.thirdWord.picture,
         },
         fourthWord: {
           word: updatedWords.fourthWord.word,
@@ -175,7 +190,6 @@ export default function CreateChallenge() {
             wordType: updatedWords.fourthWord.description.wordType,
             wordNumber: updatedWords.fourthWord.description.number,
           },
-          imageName: updatedWords.fourthWord.picture,
         },
       },
     };
@@ -184,31 +198,27 @@ export default function CreateChallenge() {
   };
 
   const handlePostChallenge = async () => {
-    const imageNames = await uploadImage(pictureURIArray);
-    if (imageNames) {
-      updateWordsWithImageNames(imageNames);
-      setWords((prevWords) => {
-        const updatedWords = {
-          ...prevWords,
-          firstWord: { ...prevWords.firstWord, picture: imageNames[0] },
-          secondWord: { ...prevWords.secondWord, picture: imageNames[1] },
-          thirdWord: { ...prevWords.thirdWord, picture: imageNames[2] },
-          fourthWord: { ...prevWords.fourthWord, picture: imageNames[3] },
-        };
-        const challengeData = prepareChallengeData(updatedWords);
-        console.log("Prepared Challenge Data:", challengeData);
-        
-        server.post("/challenge", challengeData)
-          .then(response => {
-            console.log("Challenge created successfully:", response.data);
-          })
-          .catch(error => {
-            console.error("Error creating challenge:", error);
-          });
-        
-        return updatedWords;
-      });
+    const uploadResult = await uploadImageAndCreateChallenge(pictureURIArray);
+
+    if (uploadResult) {
+      console.log("Challenge created successfully:", uploadResult);
+      showSuccessModal();
     }
+  };
+
+  const showSuccessModal = () => {
+    setSuccessModalVisible(true);
+    setTimeout(() => {
+      setSuccessModalVisible(false);
+      navigation.goBack();
+    }, 3000);
+  };
+
+  const isFormComplete = () => {
+    return Object.values(words).every(
+      (wordObj) =>
+        wordObj.word && wordObj.description.wordType && wordObj.picture
+    );
   };
 
   return (
@@ -219,16 +229,23 @@ export default function CreateChallenge() {
             <ThemedText type="link">Home</ThemedText>
           </TouchableOpacity>
         </Link>
-        <Story
-          randomStoryNumber={Number(params.id)}
-          setIsModalVisible={setIsModalVisible}
-          setSelectedKeywordIndex={setSelectedKeywordIndex}
-          setCurrentWord={setCurrentWord}
-          words={words}
-        />
-        <TouchableOpacity onPress={handlePostChallenge}>
-        <ThemedText type="link">Send Challenge</ThemedText>
-        </TouchableOpacity>
+        {storyPlot ? (
+          <Story
+            storyId={storyId}
+            plot={storyPlot}
+            setIsModalVisible={setIsModalVisible}
+            setSelectedKeywordIndex={setSelectedKeywordIndex}
+            setCurrentWord={setCurrentWord}
+            words={words}
+          />
+        ) : (
+          <Text>Loading story plot...</Text>
+        )}
+        {isFormComplete() && (
+          <TouchableOpacity onPress={handlePostChallenge}>
+            <ThemedText type="link">Send Challenge</ThemedText>
+          </TouchableOpacity>
+        )}
         <WordsModal
           isVisible={isModalVisible}
           onClose={onModalClose}
@@ -294,13 +311,29 @@ export default function CreateChallenge() {
             onClose={onCloseCamera}
           />
         </Modal>
+        <Modal
+          visible={successModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setSuccessModalVisible(false)}
+        >
+          <View style={styles.successModalContainer}>
+            <View style={styles.successModalContent}>
+              <ThemedText type="defaultSemiBold" style={styles.storyContainer}>
+                Challenge sent to
+                <ThemedText type="subtitle" style={styles.link}> {targetName}</ThemedText>
+              </ThemedText>
+            </View>
+          </View>
+        </Modal>
       </View>
     </ScrollView>
   );
 }
 
 type StoryProps = {
-  randomStoryNumber: number;
+  storyId: string;
+  plot: string;
   setIsModalVisible: (visible: boolean) => void;
   setSelectedKeywordIndex: (index: keyof Words | null) => void;
   setCurrentWord: (word: string) => void;
@@ -328,13 +361,13 @@ function useExitModal(
 }
 
 function Story({
-  randomStoryNumber,
+  storyId,
+  plot,
   setIsModalVisible,
   setSelectedKeywordIndex,
   setCurrentWord,
   words,
 }: StoryProps) {
-  const plot = stories[randomStoryNumber].plot;
   const content = replacePlaceholdersWithLinks(
     plot,
     setIsModalVisible,
@@ -433,6 +466,19 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    alignItems: "center",
+  },
+  successModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  successModalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 8,
     alignItems: "center",
   },
 });

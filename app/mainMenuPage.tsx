@@ -1,8 +1,8 @@
+import CreateChallengeButton from "@/components/CreateChallengeButton";
 import CustomModal from "@/components/CustomModal";
 import { ThemedText } from "@/components/ThemedText";
 import { fetchUserData, logout } from "@/functions/functions";
 import { User } from "@/models/User.model";
-import { getRandomStoryNumber, stories } from "@/stories/stories";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
@@ -48,19 +48,7 @@ export default function MainMenu() {
       </View>
 
       <View style={styles.buttonsContainer}>
-        <Pressable>
-          <ThemedText
-            type="link"
-            onPress={() => {
-              router.navigate(
-                `/createChallengePage?id=${getRandomStoryNumber(stories)}`
-              );
-            }}
-          >
-            Create a Challenge
-          </ThemedText>
-        </Pressable>
-
+        {userData ? <CreateChallengeButton userId={userData._id} /> : ""}
         <Pressable>
           <ThemedText
             type="link"
@@ -152,7 +140,7 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: "20%"
+    paddingVertical: "20%",
   },
   titleContainer: {
     width: "100%",

@@ -101,7 +101,7 @@ export default function TakeChallenge() {
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: `http://192.168.50.237:3000/images/${currentWord.imageName}`,
+            uri: `http://10.100.102.77:3000/images/${currentWord.imageName}`,
           }}
           style={styles.image}
         />

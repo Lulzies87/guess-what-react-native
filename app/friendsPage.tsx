@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
-import { StyleSheet, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
 
 export default function Friends() {
   return (
@@ -7,6 +8,12 @@ export default function Friends() {
       <ThemedText style={styles.title} type="title">
         Friends Page
       </ThemedText>
+      <Button
+        title="Home"
+        onPress={() => {
+          router.replace("/");
+        }}
+      />
     </View>
   );
 }

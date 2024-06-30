@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { fetchUserData, logout } from "@/functions/functions";
 import { User } from "@/models/User.model";
 import { getRandomStoryNumber, stories } from "@/stories/stories";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
@@ -25,7 +25,7 @@ export default function MainMenu() {
     };
 
     loadData();
-  }, []);
+  }, [userData]);
 
   const onSettingsClose = () => {
     setIsSettingsVisible(false);

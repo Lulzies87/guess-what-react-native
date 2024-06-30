@@ -119,7 +119,7 @@ export default function MainMenu() {
         isVisible={isChallengesVisible}
         onClose={onChallengesClose}
       >
-        <View style={styles.settingsContainer}>
+        <View style={styles.modalContentContainer}>
           <FlatList
             data={pendingChallenges}
             renderItem={(challenge) => (
@@ -140,7 +140,7 @@ export default function MainMenu() {
         isVisible={isSettingsVisible}
         onClose={onSettingsClose}
       >
-        <View style={styles.settingsContainer}>
+        <View style={styles.modalContentContainer}>
           <ThemedText>Setting 1</ThemedText>
           <ThemedText>Setting 2</ThemedText>
           <ThemedText>Setting 3</ThemedText>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 40,
   },
-  settingsContainer: {
+  modalContentContainer: {
     flex: 1,
     width: "100%",
     paddingVertical: 10,

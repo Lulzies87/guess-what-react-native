@@ -134,7 +134,7 @@ app.post("/register", async (req, res) => {
       password: hashedPassword,
       timeRegistered: new Date(),
       points: 0,
-      friends: [],
+      friends: ["667fa08a7284d4e5e8296d5d"],
       pendingChallenges: [],
     });
 
@@ -253,6 +253,38 @@ app.get("/challenge/:id", async (req, res) => {
   }
 });
 
+app.delete("/pendingChallenge/:id", async (req, res) => {
+  const challengeId = req.params.id;
+  const { userId } = req.query;
+
+  if (!challengeId) {
+    res.status(400).json({ error: "Challenge ID is required" });
+  }
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const updatedPlayer = await Player.findByIdAndUpdate(
+      userId,
+      { $pull: { pendingChallenges: challengeId } },
+      { new: true }
+    );
+
+    if (!updatedPlayer) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Pending challenge was deleted from player" });
+  } catch (error) {
+    console.error("Error deleting challenge:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/story/:id", async (req, res) => {
   const storyId = req.params.id;
 
@@ -266,6 +298,31 @@ app.get("/story/:id", async (req, res) => {
     res.status(200).json(storyData?.plot);
   } catch (error) {
     console.error("Error fetching story data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.patch("/score", async (req, res) => {
+  const { userId, pointsToAdd } = req.body;
+
+  if (!userId || typeof pointsToAdd !== "number") {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  try {
+    const playerToUpdate = await Player.findByIdAndUpdate(
+      userId,
+      { $inc: { points: pointsToAdd } },
+      { new: true }
+    );
+
+    if (!playerToUpdate) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    res.status(200).json({ message: "Player score was updated!" });
+  } catch (error) {
+    console.error("Error updating points:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

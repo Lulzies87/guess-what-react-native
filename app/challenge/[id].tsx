@@ -7,8 +7,9 @@ import {
   View,
   Image,
   TextInput,
-  Button,
+  TouchableOpacity,
 } from "react-native";
+import { router } from "expo-router";
 import server from "../api-client";
 import { Challenge, Word } from "@/models/Challenge.model";
 import ChallengeSummary from "@/components/ChallengeSummary";
@@ -84,9 +85,10 @@ export default function TakeChallenge() {
     );
   }
 
-  if (isDone) {
+  if (isDone && typeof id === "string") {
     return (
       <ChallengeSummary
+        challengeId={id}
         storyId={challenge.storyId}
         guessedWords={guessedWords}
         correctWords={words}
@@ -96,9 +98,6 @@ export default function TakeChallenge() {
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title} type="title">
-        Take Challenge Page
-      </ThemedText>
       <View style={styles.imageContainer}>
         <Image
           source={{
@@ -126,10 +125,21 @@ export default function TakeChallenge() {
       </View>
 
       <View style={styles.footer}>
+        <TouchableOpacity
+          onPress={() => {
+            router.replace("/");
+          }}
+        >
+          <ThemedText type="link">Home</ThemedText>
+        </TouchableOpacity>
         {currentWordIndex < words.length - 1 ? (
-          <Button title="Next" onPress={handleNext} />
+          <TouchableOpacity onPress={handleNext}>
+            <ThemedText type="link">Next</ThemedText>
+          </TouchableOpacity>
         ) : (
-          <Button title="Submit" onPress={handleSubmit} />
+          <TouchableOpacity onPress={handleSubmit}>
+            <ThemedText type="link">Sumbit</ThemedText>
+          </TouchableOpacity>
         )}
       </View>
     </View>
@@ -140,9 +150,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-  },
-  title: {
-    paddingVertical: 20,
+    paddingVertical: "20%",
   },
   imageContainer: {
     width: "100%",
@@ -176,6 +184,10 @@ const styles = StyleSheet.create({
     shadowColor: "darkgray",
   },
   footer: {
+    width: "80%",
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

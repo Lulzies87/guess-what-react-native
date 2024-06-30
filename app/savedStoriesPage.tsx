@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
-import { StyleSheet, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
 
 export default function SavedStories() {
   return (
@@ -7,6 +8,12 @@ export default function SavedStories() {
       <ThemedText style={styles.title} type="title">
         Saved Stories Page
       </ThemedText>
+      <Button
+        title="Home"
+        onPress={() => {
+          router.replace("/");
+        }}
+      />
     </View>
   );
 }
@@ -15,6 +22,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    paddingVertical: "20%",
   },
   title: {
     paddingVertical: 20,

@@ -1,4 +1,4 @@
-import { Text, type TextProps, StyleSheet } from "react-native";
+import { Text, type TextProps, StyleSheet, Platform } from "react-native";
 
 import { useThemeColor } from "@/hooks/useThemeColor";
 
@@ -37,29 +37,44 @@ const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     lineHeight: 24,
-    fontFamily: "Chalkduster",
+    fontFamily: Platform.select({
+      ios: "Chalkduster",
+      android: "monospace",
+    }),
   },
   defaultSemiBold: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: "600",
-    fontFamily: "Chalkduster",
+    fontFamily: Platform.select({
+      ios: "Chalkduster",
+      android: "monospace",
+    }),
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     lineHeight: 32,
-    fontFamily: "Chalkduster",
+    fontFamily: Platform.select({
+      ios: "Chalkduster",
+      android: "monospace",
+    }),
   },
   subtitle: {
     fontSize: 20,
     fontWeight: "bold",
-    fontFamily: "Chalkduster",
+    fontFamily: Platform.select({
+      ios: "Chalkduster",
+      android: "monospace",
+    }),
   },
   link: {
     lineHeight: 30,
     fontSize: 16,
     color: "darkcyan",
-    fontFamily: "Chalkduster",
+    fontFamily: Platform.select({
+      ios: "Chalkduster",
+      android: "monospace",
+    }),
   },
 });

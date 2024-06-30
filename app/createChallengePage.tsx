@@ -189,12 +189,9 @@ export default function CreateChallenge() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <ThemedText style={styles.title} type="title">
-          Create Challenge Page
-        </ThemedText>
         <Link href={`/`} asChild>
           <TouchableOpacity>
-            <Text style={styles.link}>Home</Text>
+            <ThemedText type="link">Home</ThemedText>
           </TouchableOpacity>
         </Link>
         <Story
@@ -205,7 +202,7 @@ export default function CreateChallenge() {
           words={words}
         />
         <TouchableOpacity onPress={handlePostChallenge}>
-          <Text>Send Challenge</Text>
+        <ThemedText type="link">Send Challenge</ThemedText>
         </TouchableOpacity>
         <WordsModal
           isVisible={isModalVisible}
@@ -375,9 +372,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-  },
-  title: {
-    paddingVertical: 20,
+    paddingVertical: "20%",
   },
   storyContainer: {
     padding: 20,

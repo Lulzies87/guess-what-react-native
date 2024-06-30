@@ -27,8 +27,7 @@ export async function fetchUserData() {
     });
     return res.data;
   } catch (error) {
-    console.error("Failed to fetch user data", error);
-    throw error;
+    logout();
   }
 }
 

@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
 } from "react-native";
+import { router } from "expo-router";
 import server from "../api-client";
 import { Challenge, Word } from "@/models/Challenge.model";
 import ChallengeSummary from "@/components/ChallengeSummary";
@@ -127,6 +128,12 @@ export default function TakeChallenge() {
       </View>
 
       <View style={styles.footer}>
+        <Button
+          title="Home"
+          onPress={() => {
+            router.replace("/");
+          }}
+        />
         {currentWordIndex < words.length - 1 ? (
           <Button title="Next" onPress={handleNext} />
         ) : (
@@ -177,6 +184,9 @@ const styles = StyleSheet.create({
     shadowColor: "darkgray",
   },
   footer: {
+    width: "80%",
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });

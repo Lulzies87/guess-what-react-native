@@ -84,9 +84,10 @@ export default function TakeChallenge() {
     );
   }
 
-  if (isDone) {
+  if (isDone && typeof id === "string") {
     return (
       <ChallengeSummary
+        challengeId={id}
         storyId={challenge.storyId}
         guessedWords={guessedWords}
         correctWords={words}

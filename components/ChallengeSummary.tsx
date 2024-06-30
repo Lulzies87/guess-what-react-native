@@ -8,12 +8,14 @@ import { User } from "@/models/User.model";
 import { fetchUserData } from "@/functions/functions";
 
 type ChallengeSummaryProps = {
+  challengeId: string;
   storyId: string;
   guessedWords: string[];
   correctWords: Word[];
 };
 
 export default function ChallengeSummary({
+  challengeId,
   storyId,
   guessedWords,
   correctWords,
@@ -83,6 +85,11 @@ export default function ChallengeSummary({
       await server.patch("/score", {
         userId: userData?._id,
         pointsToAdd: score,
+      });
+      await server.delete(`/pendingChallenge/${challengeId}`, {
+        params: {
+          userId: userData?._id,
+        },
       });
       router.navigate("/mainMenuPage");
     } catch (error) {

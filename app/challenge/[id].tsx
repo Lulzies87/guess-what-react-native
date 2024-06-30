@@ -98,9 +98,6 @@ export default function TakeChallenge() {
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title} type="title">
-        Take Challenge Page
-      </ThemedText>
       <View style={styles.imageContainer}>
         <Image
           source={{
@@ -148,9 +145,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-  },
-  title: {
-    paddingVertical: 20,
+    paddingVertical: "20%",
   },
   imageContainer: {
     width: "100%",

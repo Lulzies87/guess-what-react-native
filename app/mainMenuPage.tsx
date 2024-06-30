@@ -43,7 +43,6 @@ export default function MainMenu() {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <ThemedText type="title">Main Manu Page</ThemedText>
         <ThemedText type="subtitle">Hello {userData?.username}</ThemedText>
         <ThemedText>Your points total is {userData?.points}</ThemedText>
       </View>
@@ -153,11 +152,11 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingVertical: "20%"
   },
   titleContainer: {
     width: "100%",
     alignItems: "center",
-    paddingVertical: 20,
   },
   buttonsContainer: {
     flex: 8,

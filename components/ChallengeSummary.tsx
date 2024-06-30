@@ -114,7 +114,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    padding: 20,
+    paddingVertical: "20%",
+    paddingHorizontal: 20,
   },
   title: {
     paddingVertical: 20,

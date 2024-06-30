@@ -219,7 +219,7 @@ export default function CreateChallenge() {
         </ThemedText>
         <Link href={`/`} asChild>
           <TouchableOpacity>
-            <Text style={styles.link}>Home</Text>
+            <ThemedText type="link">Home</ThemedText>
           </TouchableOpacity>
         </Link>
         <Story
@@ -230,7 +230,7 @@ export default function CreateChallenge() {
           words={words}
         />
         <TouchableOpacity onPress={handlePostChallenge}>
-          <Text>Send Challenge</Text>
+        <ThemedText type="link">Send Challenge</ThemedText>
         </TouchableOpacity>
         <WordsModal
           isVisible={isModalVisible}

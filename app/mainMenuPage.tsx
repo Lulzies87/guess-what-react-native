@@ -1,21 +1,24 @@
-import SettingsModal from "@/components/SettingsModal";
+import CustomModal from "@/components/CustomModal";
 import { ThemedText } from "@/components/ThemedText";
 import { fetchUserData, logout } from "@/functions/functions";
 import { User } from "@/models/User.model";
 import { getRandomStoryNumber, stories } from "@/stories/stories";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 export default function MainMenu() {
   const [userData, setUserData] = useState<User | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  const [isChallengesVisible, setIsChallengesVisible] = useState(false);
+  const [pendingChallenges, setPendingChallenges] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const data = await fetchUserData();
         setUserData(data);
+        setPendingChallenges(data.pendingChallenges);
       } catch (error) {
         console.error("Couldn't fetch user data:", error);
       }
@@ -24,8 +27,17 @@ export default function MainMenu() {
     loadData();
   }, []);
 
-  const onModalClose = () => {
-    setIsModalVisible(false);
+  const onSettingsClose = () => {
+    setIsSettingsVisible(false);
+  };
+
+  const onChallengesClose = () => {
+    setIsChallengesVisible(false);
+  };
+
+  const onChallengePress = (id: string) => {
+    setIsChallengesVisible(false);
+    router.navigate(`/challenge/${id}`);
   };
 
   return (
@@ -54,7 +66,7 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              router.navigate("/takeChallengePage");
+              setIsChallengesVisible(true);
             }}
           >
             My Challenges
@@ -87,7 +99,7 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              setIsModalVisible(true);
+              setIsSettingsVisible(true);
             }}
           >
             Settings
@@ -102,13 +114,38 @@ export default function MainMenu() {
         </Pressable>
       </View>
 
-      <SettingsModal isVisible={isModalVisible} onClose={onModalClose}>
+      <CustomModal
+        title="Pending Challenges"
+        isVisible={isChallengesVisible}
+        onClose={onChallengesClose}
+      >
+        <View style={styles.settingsContainer}>
+          <FlatList
+            data={pendingChallenges}
+            renderItem={(challenge) => (
+              <Pressable
+                onPress={() => {
+                  onChallengePress(challenge.item);
+                }}
+              >
+                <ThemedText>{challenge.item}</ThemedText>
+              </Pressable>
+            )}
+            keyExtractor={(challenge) => challenge}
+          />
+        </View>
+      </CustomModal>
+      <CustomModal
+        title="Settings"
+        isVisible={isSettingsVisible}
+        onClose={onSettingsClose}
+      >
         <View style={styles.settingsContainer}>
           <ThemedText>Setting 1</ThemedText>
           <ThemedText>Setting 2</ThemedText>
           <ThemedText>Setting 3</ThemedText>
         </View>
-      </SettingsModal>
+      </CustomModal>
     </View>
   );
 }

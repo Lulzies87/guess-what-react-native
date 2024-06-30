@@ -7,7 +7,7 @@ import {
   View,
   Image,
   TextInput,
-  Button,
+  TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
 import server from "../api-client";
@@ -125,16 +125,21 @@ export default function TakeChallenge() {
       </View>
 
       <View style={styles.footer}>
-        <Button
-          title="Home"
+        <TouchableOpacity
           onPress={() => {
             router.replace("/");
           }}
-        />
+        >
+          <ThemedText type="link">Home</ThemedText>
+        </TouchableOpacity>
         {currentWordIndex < words.length - 1 ? (
-          <Button title="Next" onPress={handleNext} />
+          <TouchableOpacity onPress={handleNext}>
+            <ThemedText type="link">Next</ThemedText>
+          </TouchableOpacity>
         ) : (
-          <Button title="Submit" onPress={handleSubmit} />
+          <TouchableOpacity onPress={handleSubmit}>
+            <ThemedText type="link">Sumbit</ThemedText>
+          </TouchableOpacity>
         )}
       </View>
     </View>

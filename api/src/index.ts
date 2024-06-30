@@ -277,6 +277,31 @@ app.get("/story/:id", async (req, res) => {
   }
 });
 
+app.patch("/score", async (req, res) => {
+  const { userId, pointsToAdd } = req.body;
+
+  if (!userId || typeof pointsToAdd !== "number") {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  try {
+    const playerToUpdate = await Player.findByIdAndUpdate(
+      userId,
+      { $inc: { points: pointsToAdd } },
+      { new: true }
+    );
+
+    if (!playerToUpdate) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    res.status(200).json({ message: "Player score was updated!" });
+  } catch (error) {
+    console.error("Error updating points:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 async function init() {
   await initConnection();
 

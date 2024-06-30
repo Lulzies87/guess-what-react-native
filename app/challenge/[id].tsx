@@ -11,14 +11,12 @@ import {
 } from "react-native";
 import server from "../api-client";
 import { Challenge, Word } from "@/models/Challenge.model";
-import { Story } from "@/api/src/stories.model";
 import ChallengeSummary from "@/components/ChallengeSummary";
 
 export default function TakeChallenge() {
   const { id } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [story, setStory] = useState<Story | undefined>(undefined);
   const [words, setWords] = useState<Word[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [userInput, setUserInput] = useState<string | undefined>(undefined);
@@ -46,7 +44,6 @@ export default function TakeChallenge() {
       const challengeData = res.data.challengeData;
       const storyData = res.data.storyData;
       setChallenge(challengeData);
-      setStory(storyData);
       const wordsArray = Object.values(challengeData.chosenWords) as Word[];
       setWords(wordsArray);
     } catch (error) {

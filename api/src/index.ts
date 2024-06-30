@@ -235,24 +235,6 @@ app.post("/challenge", async (req, res) => {
   }
 });
 
-app.post("/upload", upload.single("image"), (req, res) => {
-  try {
-    if (!req.file) {
-      throw new Error("File upload failed");
-    }
-    console.log("Image uploaded!", req.file);
-    res.status(200).json({ fileName: req.file!.filename });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error uploading image:", error.message);
-      res.status(500).json({ error: "Failed to upload image" });
-    } else {
-      console.error("Unexpected error:", error);
-      res.status(500).json({ error: "Unexpected error occurred" });
-    }
-  }
-});
-
 app.get("/challenge/:id", async (req, res) => {
   const challengeId = req.params.id;
 

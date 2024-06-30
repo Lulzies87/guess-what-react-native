@@ -260,6 +260,38 @@ app.get("/challenge/:id", async (req, res) => {
   }
 });
 
+app.delete("/pendingChallenge/:id", async (req, res) => {
+  const challengeId = req.params.id;
+  const { userId } = req.query;
+
+  if (!challengeId) {
+    res.status(400).json({ error: "Challenge ID is required" });
+  }
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const updatedPlayer = await Player.findByIdAndUpdate(
+      userId,
+      { $pull: { pendingChallenges: challengeId } },
+      { new: true }
+    );
+
+    if (!updatedPlayer) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Pending challenge was deleted from player" });
+  } catch (error) {
+    console.error("Error deleting challenge:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/story/:id", async (req, res) => {
   const storyId = req.params.id;
 

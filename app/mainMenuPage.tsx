@@ -64,7 +64,7 @@ export default function MainMenu() {
           <ThemedText
             type="link"
             onPress={() => {
-              router.navigate("/friendsPage");
+              router.navigate(`/friendsPage?userId=${userData?._id}`);
             }}
           >
             Friends

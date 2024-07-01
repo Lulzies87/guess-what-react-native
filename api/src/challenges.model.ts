@@ -4,7 +4,7 @@ export type Word = {
   word: string;
   description: {
     wordType: "verb" | "noun" | "adjective";
-    wordNumber: "singular" | "plural";
+    wordNumber?: "singular" | "plural";
   };
   imageName: string;
 };
@@ -28,7 +28,7 @@ export const challengeSchema = new Schema<Challenge>({
       word: { type: String, required: true },
       description: {
         wordType: { type: String, enum: ["verb", "noun", "adjective"], required: true },
-        wordNumber: { type: String, enum: ["singular", "plural"], required: true },
+        wordNumber: { type: String, enum: ["singular", "plural"] },
       },
       imageName: { type: String, required: true },
     },
@@ -36,7 +36,7 @@ export const challengeSchema = new Schema<Challenge>({
       word: { type: String, required: true },
       description: {
         wordType: { type: String, enum: ["verb", "noun", "adjective"], required: true },
-        wordNumber: { type: String, enum: ["singular", "plural"], required: true },
+        wordNumber: { type: String, enum: ["singular", "plural"] },
       },
       imageName: { type: String, required: true },
     },
@@ -44,7 +44,7 @@ export const challengeSchema = new Schema<Challenge>({
       word: { type: String, required: true },
       description: {
         wordType: { type: String, enum: ["verb", "noun", "adjective"], required: true },
-        wordNumber: { type: String, enum: ["singular", "plural"], required: true },
+        wordNumber: { type: String, enum: ["singular", "plural"] },
       },
       imageName: { type: String, required: true },
     },
@@ -52,7 +52,7 @@ export const challengeSchema = new Schema<Challenge>({
       word: { type: String, required: true },
       description: {
         wordType: { type: String, enum: ["verb", "noun", "adjective"], required: true },
-        wordNumber: { type: String, enum: ["singular", "plural"], required: true },
+        wordNumber: { type: String, enum: ["singular", "plural"] },
       },
       imageName: { type: String, required: true },
     },

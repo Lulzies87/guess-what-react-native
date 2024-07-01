@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { exec } from "child_process";
+// import { exec } from "child_process";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -26,7 +26,6 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, "public", "images");
     fs.mkdirSync(uploadDir, { recursive: true });
-    console.log("Images path:", uploadDir);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
@@ -226,18 +225,18 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
       newChallenge: savedChallenge,
     });
 
-    const command = "ls -l src/public/images/";
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error executing the command: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.error(`Command stderr: ${stderr}`);
-        return;
-      }
-      console.log(`Command output:\n${stdout}`);
-    });
+    // const command = "ls -l src/public/images/";
+    // exec(command, (error, stdout, stderr) => {
+    //   if (error) {
+    //     console.error(`Error executing the command: ${error.message}`);
+    //     return;
+    //   }
+    //   if (stderr) {
+    //     console.error(`Command stderr: ${stderr}`);
+    //     return;
+    //   }
+    //   console.log(`Command output:\n${stdout}`);
+    // });
   } catch (error) {
     console.error("Error creating challenge and uploading images:", error);
     res
@@ -289,8 +288,6 @@ app.get("/challenge/:id", async (req, res) => {
         }/${parsedChallengeData.chosenWords[key]!.imageName}`;
       }
     });
-
-    console.log(parsedChallengeData);
 
     res.status(200).json({ parsedChallengeData, storyData });
   } catch (error) {

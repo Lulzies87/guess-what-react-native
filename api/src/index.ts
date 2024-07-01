@@ -217,7 +217,6 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
       $push: { pendingChallenges: savedChallenge._id }
     });
 
-    console.log("New challenge created:", savedChallenge);
     res.status(201).json({
       message: "Challenge created successfully",
       newChallenge: savedChallenge,

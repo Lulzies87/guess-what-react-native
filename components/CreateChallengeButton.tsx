@@ -12,12 +12,16 @@ interface ChallengeButtonProps {
 export default function ChallengeButton({ userId }: ChallengeButtonProps) {
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [friendsList, setFriendsList] = useState<{ id: string; username: string }[]>([]);
+  const [friendsList, setFriendsList] = useState<
+    { id: string; username: string }[]
+  >([]);
 
   useEffect(() => {
     const fetchFriendsList = async () => {
       try {
-        const response = await server.get('/getFriendsList', { params: { userId } });
+        const response = await server.get("/getFriendsList", {
+          params: { userId },
+        });
         if (response.status === 200) {
           setFriendsList(response.data);
         } else {
@@ -33,11 +37,11 @@ export default function ChallengeButton({ userId }: ChallengeButtonProps) {
 
   const fetchRandomStory = async () => {
     try {
-      const response = await fetch("http://10.100.102.77:3000/randomStory");
-      if (!response.ok) {
+      const response = await server.get("/randomStory");
+      if (!response) {
         throw new Error("Network response was not ok");
       }
-      const randomStory = await response.json();
+      const randomStory = response.data;
       return randomStory;
     } catch (error) {
       console.error("Error fetching random story:", error);
@@ -45,10 +49,15 @@ export default function ChallengeButton({ userId }: ChallengeButtonProps) {
     }
   };
 
-  const handleFriendSelection = async (friendId: string, friendName: string) => {
+  const handleFriendSelection = async (
+    friendId: string,
+    friendName: string
+  ) => {
     const randomStory = await fetchRandomStory();
     if (randomStory) {
-      router.push(`/createChallengePage?id=${randomStory._id}&target=${friendId}&targetName=${friendName}&creator=${userId}`);
+      router.push(
+        `/createChallengePage?id=${randomStory._id}&target=${friendId}&targetName=${friendName}&creator=${userId}`
+      );
       setIsModalVisible(false);
     } else {
       console.error("Failed to fetch a random story");
@@ -58,9 +67,7 @@ export default function ChallengeButton({ userId }: ChallengeButtonProps) {
   return (
     <>
       <Pressable onPress={() => setIsModalVisible(true)}>
-        <ThemedText type="link">
-          Create a Challenge
-        </ThemedText>
+        <ThemedText type="link">Create a Challenge</ThemedText>
       </Pressable>
 
       <CustomModal

@@ -1,9 +1,5 @@
 import axios from "axios";
 
 export default axios.create({
-  baseURL: "http://10.100.102.77:3000",
+  baseURL: "https://guess-what-react-native.onrender.com",
 });
-
-// export default axios.create({
-//   baseURL: "http://192.168.50.237:3000",
-// });

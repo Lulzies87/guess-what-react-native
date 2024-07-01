@@ -29,7 +29,10 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
   },
 });
 
@@ -214,7 +217,7 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
     const savedChallenge = await newChallenge.save();
 
     await Player.findByIdAndUpdate(target, {
-      $push: { pendingChallenges: savedChallenge._id }
+      $push: { pendingChallenges: savedChallenge._id },
     });
 
     res.status(201).json({
@@ -223,7 +226,9 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating challenge and uploading images:", error);
-    res.status(500).json({ error: error || "Failed to upload images and create challenge" });
+    res
+      .status(500)
+      .json({ error: error || "Failed to upload images and create challenge" });
   }
 });
 
@@ -245,7 +250,33 @@ app.get("/challenge/:id", async (req, res) => {
       "-_id"
     );
 
-    res.status(200).json({ challengeData, storyData });
+    const parsedChallengeData = challengeData.toObject() as {
+      chosenWords?: {
+        firstWord?: { imageName: string };
+        secondWord?: { imageName: string };
+        thirdWord?: { imageName: string };
+        fourthWord?: { imageName: string };
+      };
+    };
+    const keysToUpdate = [
+      "firstWord",
+      "secondWord",
+      "thirdWord",
+      "fourthWord",
+    ] as const;
+
+    keysToUpdate.forEach((key) => {
+      if (
+        parsedChallengeData.chosenWords &&
+        parsedChallengeData.chosenWords[key]!.imageName
+      ) {
+        parsedChallengeData.chosenWords[key]!.imageName = `${
+          process.env.SERVER_URL
+        }/${parsedChallengeData.chosenWords[key]!.imageName}`;
+      }
+    });
+
+    res.status(200).json({ parsedChallengeData, storyData });
   } catch (error) {
     console.error("Error fetching challenge data:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -305,41 +336,47 @@ app.get("/randomStory", async (req, res) => {
   try {
     const count = await Story.countDocuments();
     if (count === 0) {
-      return res.status(404).json({ error: 'No stories found' });
+      return res.status(404).json({ error: "No stories found" });
     }
 
     const random = Math.floor(Math.random() * count);
     const randomStory = await Story.findOne().skip(random);
 
     if (!randomStory) {
-      return res.status(404).json({ error: 'Random story not found' });
+      return res.status(404).json({ error: "Random story not found" });
     }
 
     res.json(randomStory);
   } catch (error) {
-    console.error('Error fetching random story:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching random story:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.get('/getFriendsList', async (req, res) => {
+app.get("/getFriendsList", async (req, res) => {
   const userId = req.query.userId;
 
   if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
+    return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-    const user = await Player.findById(userId).select('friends');
+    const user = await Player.findById(userId).select("friends");
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    const friends = await Player.find({ _id: { $in: user.friends } }).select('username');
-    res.status(200).json(friends.map(friend => ({ id: friend._id, username: friend.username })));
+    const friends = await Player.find({ _id: { $in: user.friends } }).select(
+      "username"
+    );
+    res
+      .status(200)
+      .json(
+        friends.map((friend) => ({ id: friend._id, username: friend.username }))
+      );
   } catch (error) {
     console.error("Error fetching friends list:", error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

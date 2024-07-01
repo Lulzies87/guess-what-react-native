@@ -285,10 +285,12 @@ app.get("/challenge/:id", async (req, res) => {
         parsedChallengeData.chosenWords[key]!.imageName
       ) {
         parsedChallengeData.chosenWords[key]!.imageName = `${
-          process.env.SERVER_URL
+          process.env.SERVER_IMAGES_URL
         }/${parsedChallengeData.chosenWords[key]!.imageName}`;
       }
     });
+
+    console.log(parsedChallengeData);
 
     res.status(200).json({ parsedChallengeData, storyData });
   } catch (error) {

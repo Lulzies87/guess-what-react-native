@@ -42,7 +42,7 @@ export default function TakeChallenge() {
   const getChallengeData = async (id: string) => {
     try {
       const res = await server.get(`/challenge/${id}`);
-      const challengeData = res.data.challengeData;
+      const challengeData = res.data.parsedChallengeData;
       const storyData = res.data.storyData;
       setChallenge(challengeData);
       const wordsArray = Object.values(challengeData.chosenWords) as Word[];
@@ -79,8 +79,15 @@ export default function TakeChallenge() {
 
   if (!challenge) {
     return (
-      <View>
+      <View style={styles.container}>
         <ThemedText>No challenge data available</ThemedText>
+        <TouchableOpacity
+          onPress={() => {
+            router.replace("/");
+          }}
+        >
+          <ThemedText type="link">Home</ThemedText>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -101,7 +108,7 @@ export default function TakeChallenge() {
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: `http://10.100.102.77:3000/images/${currentWord.imageName}`,
+            uri: currentWord.imageName,
           }}
           style={styles.image}
         />

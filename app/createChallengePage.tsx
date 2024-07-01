@@ -76,21 +76,18 @@ export default function CreateChallenge() {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Challenge created successfully:", res.data);
       return res.data;
     } catch (error) {
       console.error(
         "Error uploading images and creating challenge:",
         JSON.stringify(error)
       );
-      console.log("failed to create challenge");
       return null;
     }
   };
 
   useEffect(() => {
     setStoryId(storyIdFromParams);
-    console.log(challengeCreatorValue);
     if (storyIdFromParams) {
       fetchPlotData(storyIdFromParams);
     }
@@ -201,7 +198,6 @@ export default function CreateChallenge() {
     const uploadResult = await uploadImageAndCreateChallenge(pictureURIArray);
 
     if (uploadResult) {
-      console.log("Challenge created successfully:", uploadResult);
       showSuccessModal();
     }
   };
@@ -321,7 +317,10 @@ export default function CreateChallenge() {
             <View style={styles.successModalContent}>
               <ThemedText type="defaultSemiBold" style={styles.storyContainer}>
                 Challenge sent to
-                <ThemedText type="subtitle" style={styles.link}> {targetName}</ThemedText>
+                <ThemedText type="subtitle" style={styles.link}>
+                  {" "}
+                  {targetName}
+                </ThemedText>
               </ThemedText>
             </View>
           </View>

@@ -26,6 +26,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, "public", "images");
     fs.mkdirSync(uploadDir, { recursive: true });
+    console.log(uploadDir);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {

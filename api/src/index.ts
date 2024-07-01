@@ -1,5 +1,6 @@
 import "dotenv/config";
 
+import { exec } from "child_process";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -223,6 +224,19 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
     res.status(201).json({
       message: "Challenge created successfully",
       newChallenge: savedChallenge,
+    });
+
+    const command = "ls -l src/public/images/";
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing the command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        return;
+      }
+      console.log(`Command output:\n${stdout}`);
     });
   } catch (error) {
     console.error("Error creating challenge and uploading images:", error);

@@ -179,11 +179,7 @@ app.post("/createChallenge", upload.array("images", 4), async (req, res) => {
       !parsedChosenWords.firstWord.word ||
       !parsedChosenWords.secondWord.word ||
       !parsedChosenWords.thirdWord.word ||
-      !parsedChosenWords.fourthWord.word ||
-      !parsedChosenWords.firstWord.description ||
-      !parsedChosenWords.secondWord.description ||
-      !parsedChosenWords.thirdWord.description ||
-      !parsedChosenWords.fourthWord.description
+      !parsedChosenWords.fourthWord.word
     ) {
       throw new Error("Invalid chosenWords structure");
     }
